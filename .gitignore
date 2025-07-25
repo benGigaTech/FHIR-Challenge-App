@@ -31,3 +31,4 @@ hl7-fhir.md
 project.md
 prd.txt
 plan.md
+.env.example
