@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FHIR Resources Test</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>FHIR Resources Test</h1>
+      <div id="auth-status" class="unauthenticated">Not authenticated</div>
+    </header>
+
+    <div id="patient-info" class="patient-info">
+      <h3>Patient Information</h3>
+      <p id="patient-name">Loading patient information...</p>
+    </div>
+
+    <div id="resource-selector-container"></div>
+    <div id="cards-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.js"></script>
+    <script type="module">
+      import { 
+        createExpandableCard, 
+        createResourceTypeSelector, 
+        createResourceCardContainer,
+        setCardContent,
+        createLoadingIndicator,
+        createCardError,
+        createNoDataMessage
+      } from './js/expandable-cards.js';
+      
+      import { 
+        ResourceTypes, 
+        fetchResourceData 
+      } from './js/fhir-resources.js';
+
+      let fhirClient;
+      let patientId;
+      let currentResourceType = ResourceTypes.ALLERGY;
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        try {
+          // Initialize FHIR client
+          await initializeFhirClient();
+          
+          // Get patient info
+          await loadPatientInfo();
+          
+          // Define resource types
+          const resourceTypes = [
+            { id: ResourceTypes.ALLERGY, name: 'Allergies' },
+            { id: ResourceTypes.MEDICATION, name: 'Medications' },
+            { id: ResourceTypes.IMMUNIZATION, name: 'Immunizations' }
+          ];
+
+          // Create resource selector
+          const selectorContainer = document.getElementById('resource-selector-container');
+          const resourceSelector = createResourceTypeSelector(resourceTypes, handleResourceSelect, ResourceTypes.ALLERGY);
+          selectorContainer.appendChild(resourceSelector);
+
+          // Create resource card container
+          const cardsContainer = document.getElementById('cards-container');
+          const cardContainer = createResourceCardContainer('resource-cards');
+          cardsContainer.appendChild(cardContainer);
+
+          // Load initial resource data
+          await loadResourceData(currentResourceType);
+        } catch (error) {
+          console.error('Initialization error:', error);
+          document.getElementById('auth-status').textContent = 'Error: ' + (error.message || 'Failed to initialize');
+          document.getElementById('auth-status').className = 'unauthenticated';
+        }
+      });
+
+      // Initialize FHIR client
+      async function initializeFhirClient() {
+        try {
+          // For testing purposes, we'll use the SMART sandbox
+          fhirClient = FHIR.client({
+            serverUrl: 'https://r4.smarthealthit.org',
+            tokenResponse: {
+              // This is a simulated token for testing only
+              access_token: 'simulated-token',
+              patient: 'smart-1288992'
+            }
+          });
+          
+          document.getElementById('auth-status').textContent = 'Authenticated to FHIR server';
+          document.getElementById('auth-status').className = 'authenticated';
+          
+          return fhirClient;
+        } catch (error) {
+          console.error('FHIR client initialization error:', error);
+          document.getElementById('auth-status').textContent = 'Authentication failed';
+          document.getElementById('auth-status').className = 'unauthenticated';
+          throw error;
+        }
+      }
+
+      // Load patient information
+      async function loadPatientInfo() {
+        try {
+          // Get patient ID from token response
+          patientId = fhirClient.patient.id;
+          
+          // Get patient resource
+          const patient = await fhirClient.request(`Patient/${patientId}`);
+          
+          // Display patient information
+          const patientName = formatPatientName(patient);
+          document.getElementById('patient-name').textContent = `Name: ${patientName} (ID: ${patientId})`;
+          
+          return patient;
+        } catch (error) {
+          console.error('Error loading patient info:', error);
+          document.getElementById('patient-name').textContent = 'Error loading patient information';
+          throw error;
+        }
+      }
+
+      // Format patient name
+      function formatPatientName(patient) {
+        if (!patient || !patient.name || !patient.name.length) {
+          return 'Unknown';
+        }
+        
+        const name = patient.name[0];
+        const given = name.given ? name.given.join(' ') : '';
+        const family = name.family || '';
+        
+        return `${given} ${family}`.trim() || 'Unknown';
+      }
+
+      // Handle resource type selection
+      async function handleResourceSelect(resourceType) {
+        console.log(`Selected resource type: ${resourceType}`);
+        currentResourceType = resourceType;
+        await loadResourceData(resourceType);
+      }
+
+      // Load resource data
+      async function loadResourceData(resourceType) {
+        const cardContainer = document.getElementById('resource-cards');
+        cardContainer.innerHTML = '';
+        
+        try {
+          // Show loading indicator
+          setCardContent('resource-cards', createLoadingIndicator(`Loading ${resourceType} data...`));
+          
+          // Fetch resource data
+          const resources = await fetchResourceData(fhirClient, patientId, resourceType);
+          
+          // Check if we have data
+          if (!resources || resources.length === 0) {
+            setCardContent('resource-cards', createNoDataMessage(
+              capitalizeFirstLetter(resourceType),
+              `No ${resourceType} found for this patient.`
+            ));
+            return;
+          }
+          
+          // Clear loading indicator
+          cardContainer.innerHTML = '';
+          
+          // Create cards for each resource
+          resources.forEach((resource, index) => {
+            const cardId = `${resourceType}-${index}`;
+            const cardTitle = getResourceCardTitle(resource, resourceType);
+            const card = createExpandableCard(cardTitle, cardId, index === 0);
+            cardContainer.appendChild(card);
+            
+            // Set card content
+            const content = formatResourceCardContent(resource, resourceType);
+            setCardContent(cardId, content);
+          });
+        } catch (error) {
+          console.error(`Error loading ${resourceType} data:`, error);
+          
+          // Display error message
+          const errorMessage = error.message || `Failed to load ${resourceType} data`;
+          const errorType = error.type || 'UNKNOWN_ERROR';
+          const errorHelp = error.details?.help || 'Please try again later';
+          
+          setCardContent('resource-cards', createCardError(
+            errorMessage,
+            errorType,
+            errorHelp
+          ));
+        }
+      }
+
+      // Get card title based on resource type and data
+      function getResourceCardTitle(resource, resourceType) {
+        switch (resourceType) {
+          case ResourceTypes.ALLERGY:
+            return `Allergy: ${resource.substance?.display || 'Unknown'}`;
+          case ResourceTypes.MEDICATION:
+            return `Medication: ${resource.medicationDisplay || 'Unknown'}`;
+          case ResourceTypes.IMMUNIZATION:
+            return `Immunization: ${resource.vaccineDisplay || 'Unknown'}`;
+          default:
+            return `Resource: ${resource.id || 'Unknown'}`;
+        }
+      }
+
+      // Format card content based on resource type and data
+      function formatResourceCardContent(resource, resourceType) {
+        switch (resourceType) {
+          case ResourceTypes.ALLERGY:
+            return formatAllergyContent(resource);
+          case ResourceTypes.MEDICATION:
+            return formatMedicationContent(resource);
+          case ResourceTypes.IMMUNIZATION:
+            return formatImmunizationContent(resource);
+          default:
+            return `<div class="allergy-item">
+              <h4>Unknown Resource Type</h4>
+              <p>Resource ID: ${resource.id || 'Unknown'}</p>
+              <p>Resource Type: ${resource.resourceType || 'Unknown'}</p>
+            </div>`;
+        }
+      }
+
+      // Format allergy content
+      function formatAllergyContent(allergy) {
+        return `
+          <div class="allergy-item">
+            <h4>${allergy.substance?.display || 'Unknown Substance'}</h4>
+            <p><strong>Status:</strong> ${allergy.status || 'Unknown'}</p>
+            <p><strong>Category:</strong> ${allergy.category || 'Unknown'}</p>
+            <p><strong>Criticality:</strong> ${allergy.criticality || 'Unknown'}</p>
+            ${allergy.reactions && allergy.reactions.length > 0 ? 
+              `<p><strong>Reaction:</strong> ${allergy.reactions.map(r => r.manifestation?.display || 'Unknown').join(', ')}</p>` : 
+              ''}
+            ${allergy.onset ? `<p><strong>Onset:</strong> ${allergy.onset}</p>` : ''}
+          </div>
+        `;
+      }
+
+      // Format medication content
+      function formatMedicationContent(medication) {
+        return `
+          <div class="allergy-item">
+            <h4>${medication.medicationDisplay || 'Unknown Medication'}</h4>
+            <p><strong>Status:</strong> ${medication.status || 'Unknown'}</p>
+            <p><strong>Intent:</strong> ${medication.intent || 'Unknown'}</p>
+            ${medication.dosageInstructions && medication.dosageInstructions.length > 0 ? 
+              `<p><strong>Dosage:</strong> ${medication.dosageInstructions.join('; ')}</p>` : 
+              ''}
+            ${medication.dateWritten ? `<p><strong>Date Written:</strong> ${formatDate(medication.dateWritten)}</p>` : ''}
+            ${medication.prescriber ? `<p><strong>Prescriber:</strong> ${medication.prescriber.display || 'Unknown'}</p>` : ''}
+            ${medication.note ? `<p><strong>Note:</strong> ${medication.note}</p>` : ''}
+          </div>
+        `;
+      }
+
+      // Format immunization content
+      function formatImmunizationContent(immunization) {
+        return `
+          <div class="allergy-item">
+            <h4>${immunization.vaccineDisplay || 'Unknown Vaccine'}</h4>
+            <p><strong>Status:</strong> ${immunization.status || 'Unknown'}</p>
+            ${immunization.occurrenceDate ? `<p><strong>Date:</strong> ${formatDate(immunization.occurrenceDate)}</p>` : ''}
+            ${immunization.performer ? `<p><strong>Performer:</strong> ${immunization.performer.display || 'Unknown'}</p>` : ''}
+            ${immunization.lotNumber ? `<p><strong>Lot Number:</strong> ${immunization.lotNumber}</p>` : ''}
+            ${immunization.site ? `<p><strong>Site:</strong> ${immunization.site}</p>` : ''}
+            ${immunization.route ? `<p><strong>Route:</strong> ${immunization.route}</p>` : ''}
+            ${immunization.note ? `<p><strong>Note:</strong> ${immunization.note}</p>` : ''}
+          </div>
+        `;
+      }
+
+      // Format date
+      function formatDate(dateString) {
+        if (!dateString) return '';
+        
+        try {
+          const date = new Date(dateString);
+          return date.toLocaleDateString();
+        } catch (e) {
+          return dateString;
+        }
+      }
+
+      // Capitalize first letter
+      function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+    </script>
+  </div>
+</body>
+</html>

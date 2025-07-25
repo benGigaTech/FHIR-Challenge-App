@@ -1,6 +1,7 @@
 /**
  * SMART on FHIR Application JavaScript
- * Main application file that handles FHIR client interactions and displays patient allergy information
+ * Main application file that handles FHIR client interactions and displays patient health information
+ * including allergies, medications, and immunizations
  */
 
 // Import error handling utilities
@@ -15,6 +16,20 @@ import { searchResources, getResource } from './api.js';
 // Import FHIR client module for allergy queries
 import { getAllergyData, getAllergyDataPaginated, normalizeAllergyData } from './fhir-client.js';
 
+// Import FHIR resources module for multi-resource support
+import { ResourceTypes, fetchResourceData } from './fhir-resources.js';
+
+// Import expandable cards UI components
+import { 
+  createExpandableCard, 
+  createResourceTypeSelector, 
+  createResourceCardContainer,
+  setCardContent,
+  createLoadingIndicator,
+  createCardError,
+  createNoDataMessage
+} from './expandable-cards.js';
+
 // Import JSON display functionality
 import { displayJsonData, displayFhirResourcesList, exportJsonData } from './json-display.js';
 
@@ -27,11 +42,14 @@ import patientStore from './patient-store.js';
 // DOM elements
 const patientBanner = document.getElementById('patient-banner');
 const allergiesList = document.getElementById('allergies-list');
+const resourceContainer = document.getElementById('resource-container');
+const resourceSelectorContainer = document.getElementById('resource-selector-container');
 const authStatus = document.getElementById('auth-status');
 const errorContainer = document.getElementById('error-container');
 const connectionInfo = document.getElementById('connection-info');
 
 let fhirClient = null;
+let currentResourceType = ResourceTypes.ALLERGY; // Default resource type
 
 /**
  * Initialize the application
@@ -55,6 +73,8 @@ async function initializeApp() {
       authUpdateStatusUI('authenticated');
       updateConnectionInfo();
       await initializePatientContext();
+      initializeResourceSelector();
+      await loadResourceData(currentResourceType);
       initializeJsonControls();
     }
   } catch (error) {
@@ -98,13 +118,23 @@ function updateAuthStatusUI(status, message) {
 }
 
 /**
- * Show loading state in the allergies list
+ * Show loading state in the resource container
  * @param {string} message - The loading message to display
+ * @param {string} containerId - The ID of the container to show loading in (defaults to resource-cards)
  */
-function showLoadingState(message = 'Loading...') {
-  if (!allergiesList) return;
+function showLoadingState(message = 'Loading...', containerId = 'resource-cards') {
+  const container = document.getElementById(containerId) || allergiesList;
   
-  allergiesList.innerHTML = `
+  if (!container) return;
+  
+  // If using the new expandable cards system
+  if (containerId === 'resource-cards') {
+    setCardContent(containerId, createLoadingIndicator(message));
+    return;
+  }
+  
+  // Legacy loading display for allergiesList
+  container.innerHTML = `
     <div class="loading">
       <div class="spinner"></div>
       <p>${message}</p>
@@ -184,7 +214,7 @@ async function initializePatientContext() {
     displayPatientInfo(patientContext);
     
     // Load patient allergy data
-    await loadPatientData();
+    await loadResourceData(currentResourceType);
     
   } catch (error) {
     console.error('Error initializing patient context:', error);
@@ -205,27 +235,32 @@ async function initializePatientContext() {
 
 /**
  * Load patient data from the FHIR server
+ * @deprecated Use loadResourceData instead for the new expandable cards UI
  */
 async function loadPatientData() {
   try {
     // Show loading state
-    showLoadingState('Loading patient information...');
+    showLoadingState('Loading allergy data...');
     
-    // Hide any previous errors
-    if (errorContainer) {
-      errorContainer.innerHTML = '';
-      errorContainer.style.display = 'none';
+    // Get patient ID from the client
+    const fhirPatientId = fhirClient.patient.id;
+    
+    if (!fhirPatientId) {
+      throw createError(
+        PatientContextError.MISSING_PATIENT_ID,
+        'Patient ID is missing',
+        { help: 'Please ensure you have selected a patient in the EHR.' }
+      );
     }
     
     // Get patient allergies
     const patientContext = patientStore.getPatientContext();
-    const patientId = patientContext?.id;
     
     // Debug logging
     console.log('Patient context:', patientContext);
     console.log('FHIR client state:', fhirClient ? 'Available' : 'Missing');
     
-    if (!patientId) {
+    if (!fhirPatientId) {
       throw createError(
         'MISSING_PATIENT_ID',
         'No patient ID available. Please ensure you have selected a patient.',
@@ -241,12 +276,12 @@ async function loadPatientData() {
       );
     }
     
-    console.log(`Attempting to retrieve allergies for patient ID: ${patientId}`);
+    console.log(`Attempting to retrieve allergies for patient ID: ${fhirPatientId}`);
     
     // Get patient allergies with pagination support - with error handling
     let allergies;
     try {
-      allergies = await getAllergyDataPaginated(fhirClient, patientId, {
+      allergies = await getAllergyDataPaginated(fhirClient, fhirPatientId, {
         includeReferences: ['patient', 'asserter'],
         sortOrder: '-date',
         maxPages: 5,
@@ -321,7 +356,7 @@ function displayPatientInfo(patientContext) {
 }
 
 /**
- * Display allergies in the UI
+ * Display allergies in the UI (legacy function for backward compatibility)
  * @param {Array} allergies - Array of normalized allergy data
  */
 function displayAllergies(allergies) {
@@ -350,6 +385,173 @@ function displayAllergies(allergies) {
 }
 
 /**
+ * Display resources in the UI using expandable cards
+ * @param {Array} resources - Array of resource data
+ * @param {string} resourceType - Type of resource being displayed
+ */
+function displayResources(resources, resourceType) {
+  const cardContainer = document.getElementById('resource-cards');
+  
+  if (!cardContainer) {
+    console.error('Resource card container not found');
+    return;
+  }
+  
+  // Clear existing cards
+  cardContainer.innerHTML = '';
+  
+  // Check if we have data
+  if (!resources || resources.length === 0) {
+    // Show no data message
+    setCardContent('resource-cards', createNoDataMessage(
+      capitalizeFirstLetter(resourceType),
+      `No ${resourceType} found for this patient.`
+    ));
+    return;
+  }
+  
+  // Create cards for each resource
+  resources.forEach((resource, index) => {
+    const cardId = `${resourceType}-${index}`;
+    const cardTitle = getResourceCardTitle(resource, resourceType);
+    const card = createExpandableCard(cardTitle, cardId, index === 0);
+    cardContainer.appendChild(card);
+    
+    // Set card content
+    const content = formatResourceCardContent(resource, resourceType);
+    setCardContent(cardId, content);
+  });
+}
+
+/**
+ * Get card title based on resource type and data
+ * @param {Object} resource - Resource data
+ * @param {string} resourceType - Type of resource
+ * @returns {string} Card title
+ */
+function getResourceCardTitle(resource, resourceType) {
+  switch (resourceType) {
+    case ResourceTypes.ALLERGY:
+      return `Allergy: ${resource.substance?.display || resource.code || 'Unknown'}`;
+    case ResourceTypes.MEDICATION:
+      return `Medication: ${resource.medicationDisplay || 'Unknown'}`;
+    case ResourceTypes.IMMUNIZATION:
+      return `Immunization: ${resource.vaccineDisplay || 'Unknown'}`;
+    default:
+      return `Resource: ${resource.id || 'Unknown'}`;
+  }
+}
+
+/**
+ * Format card content based on resource type and data
+ * @param {Object} resource - Resource data
+ * @param {string} resourceType - Type of resource
+ * @returns {string} Formatted HTML content
+ */
+function formatResourceCardContent(resource, resourceType) {
+  switch (resourceType) {
+    case ResourceTypes.ALLERGY:
+      return formatAllergyContent(resource);
+    case ResourceTypes.MEDICATION:
+      return formatMedicationContent(resource);
+    case ResourceTypes.IMMUNIZATION:
+      return formatImmunizationContent(resource);
+    default:
+      return `<div class="allergy-item">
+        <h4>Unknown Resource Type</h4>
+        <p>Resource ID: ${resource.id || 'Unknown'}</p>
+        <p>Resource Type: ${resource.resourceType || 'Unknown'}</p>
+      </div>`;
+  }
+}
+
+/**
+ * Format allergy content
+ * @param {Object} allergy - Allergy resource
+ * @returns {string} Formatted HTML content
+ */
+function formatAllergyContent(allergy) {
+  return `
+    <div class="allergy-item">
+      <h4>${allergy.substance?.display || allergy.code || 'Unknown Substance'}</h4>
+      <p><strong>Status:</strong> ${allergy.clinicalStatus || 'Unknown'} ${allergy.verificationStatus ? `(${allergy.verificationStatus})` : ''}</p>
+      <p><strong>Category:</strong> ${allergy.category || 'Unknown'}</p>
+      <p><strong>Criticality:</strong> ${allergy.criticality || 'Unknown'}</p>
+      ${allergy.reactions && allergy.reactions.length > 0 ? 
+        `<p><strong>Reaction:</strong> ${allergy.reactions.map(r => r.manifestation || 'Unknown').join(', ')}</p>` : 
+        ''}
+      ${allergy.recordedDate && allergy.recordedDate !== 'Unknown' ? `<p><strong>Recorded:</strong> ${formatDate(allergy.recordedDate)}</p>` : ''}
+    </div>
+  `;
+}
+
+/**
+ * Format medication content
+ * @param {Object} medication - Medication resource
+ * @returns {string} Formatted HTML content
+ */
+function formatMedicationContent(medication) {
+  return `
+    <div class="allergy-item">
+      <h4>${medication.medicationDisplay || 'Unknown Medication'}</h4>
+      <p><strong>Status:</strong> ${medication.status || 'Unknown'}</p>
+      <p><strong>Intent:</strong> ${medication.intent || 'Unknown'}</p>
+      ${medication.dosageInstructions && medication.dosageInstructions.length > 0 ? 
+        `<p><strong>Dosage:</strong> ${medication.dosageInstructions.join('; ')}</p>` : 
+        ''}
+      ${medication.dateWritten ? `<p><strong>Date Written:</strong> ${formatDate(medication.dateWritten)}</p>` : ''}
+      ${medication.prescriber ? `<p><strong>Prescriber:</strong> ${medication.prescriber.display || 'Unknown'}</p>` : ''}
+      ${medication.note ? `<p><strong>Note:</strong> ${medication.note}</p>` : ''}
+    </div>
+  `;
+}
+
+/**
+ * Format immunization content
+ * @param {Object} immunization - Immunization resource
+ * @returns {string} Formatted HTML content
+ */
+function formatImmunizationContent(immunization) {
+  return `
+    <div class="allergy-item">
+      <h4>${immunization.vaccineDisplay || 'Unknown Vaccine'}</h4>
+      <p><strong>Status:</strong> ${immunization.status || 'Unknown'}</p>
+      ${immunization.occurrenceDate ? `<p><strong>Date:</strong> ${formatDate(immunization.occurrenceDate)}</p>` : ''}
+      ${immunization.performer ? `<p><strong>Performer:</strong> ${immunization.performer.display || 'Unknown'}</p>` : ''}
+      ${immunization.lotNumber ? `<p><strong>Lot Number:</strong> ${immunization.lotNumber}</p>` : ''}
+      ${immunization.site ? `<p><strong>Site:</strong> ${immunization.site}</p>` : ''}
+      ${immunization.route ? `<p><strong>Route:</strong> ${immunization.route}</p>` : ''}
+      ${immunization.note ? `<p><strong>Note:</strong> ${immunization.note}</p>` : ''}
+    </div>
+  `;
+}
+
+/**
+ * Format date for display
+ * @param {string} dateString - Date string to format
+ * @returns {string} Formatted date string
+ */
+function formatDate(dateString) {
+  if (!dateString) return '';
+  
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  } catch (e) {
+    return dateString;
+  }
+}
+
+/**
+ * Capitalize first letter of a string
+ * @param {string} string - String to capitalize
+ * @returns {string} Capitalized string
+ */
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+/**
  * Initialize JSON display controls
  */
 function initializeJsonControls() {
@@ -372,10 +574,14 @@ function initializeJsonControls() {
   
   if (exportButton) {
     exportButton.addEventListener('click', () => {
-      if (window.currentAllergyData && window.currentAllergyData.length > 0) {
-        exportJsonData(window.currentAllergyData, 'patient-allergies.json');
+      // Use current resource data if available, otherwise fall back to allergy data
+      const dataToExport = window.currentResourceData || window.currentAllergyData;
+      
+      if (dataToExport && dataToExport.length > 0) {
+        const filename = `patient-${currentResourceType || 'allergies'}.json`;
+        exportJsonData(dataToExport, filename);
       } else {
-        alert('No allergy data available to export');
+        alert('No data available to export');
       }
     });
   }

@@ -1907,7 +1907,7 @@ var FhirClient = /*#__PURE__*/function () {
                 method: "POST",
                 body: JSON.stringify(resource),
                 headers: _objectSpread({
-                  "content-type": "application/json"
+                  "content-type": "application/json+fhir"
                 }, (requestOptions || {}).headers)
               })));
             case 1:
@@ -1942,7 +1942,7 @@ var FhirClient = /*#__PURE__*/function () {
                 method: "PUT",
                 body: JSON.stringify(resource),
                 headers: _objectSpread({
-                  "content-type": "application/json"
+                  "content-type": "application/json+fhir"
                 }, (requestOptions || {}).headers)
               })));
             case 1:
@@ -3143,7 +3143,7 @@ function request(url) {
     mode: "cors"
   }, options), {}, {
     headers: _objectSpread({
-      accept: "application/json"
+      accept: "application/json+fhir"
     }, loweCaseKeys(options.headers))
   })).then(checkResponse).then(function (res) {
     var type = res.headers.get("content-type") + "";

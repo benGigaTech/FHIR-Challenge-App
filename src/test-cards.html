@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expandable Cards Test</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Expandable Cards Test</h1>
+    </header>
+
+    <div id="resource-selector-container"></div>
+    <div id="cards-container"></div>
+
+    <script type="module">
+      import { 
+        createExpandableCard, 
+        createResourceTypeSelector, 
+        createResourceCardContainer,
+        setCardContent,
+        createLoadingIndicator,
+        createCardError,
+        createNoDataMessage
+      } from './js/expandable-cards.js';
+
+      document.addEventListener('DOMContentLoaded', () => {
+        // Define resource types
+        const resourceTypes = [
+          { id: 'allergies', name: 'Allergies' },
+          { id: 'medications', name: 'Medications' },
+          { id: 'immunizations', name: 'Immunizations' },
+          { id: 'conditions', name: 'Conditions' }
+        ];
+
+        // Create resource selector
+        const selectorContainer = document.getElementById('resource-selector-container');
+        const resourceSelector = createResourceTypeSelector(resourceTypes, handleResourceSelect, 'allergies');
+        selectorContainer.appendChild(resourceSelector);
+
+        // Create resource card container
+        const cardsContainer = document.getElementById('cards-container');
+        const cardContainer = createResourceCardContainer('resource-cards');
+        cardsContainer.appendChild(cardContainer);
+
+        // Create initial cards
+        createCards('allergies');
+
+        // Handle resource type selection
+        function handleResourceSelect(resourceType) {
+          console.log(`Selected resource type: ${resourceType}`);
+          createCards(resourceType);
+        }
+
+        // Create cards based on resource type
+        function createCards(resourceType) {
+          // Clear existing cards
+          const cardContainer = document.getElementById('resource-cards');
+          cardContainer.innerHTML = '';
+
+          // Create cards based on resource type
+          switch(resourceType) {
+            case 'allergies':
+              createAllergiesCards();
+              break;
+            case 'medications':
+              createMedicationsCards();
+              break;
+            case 'immunizations':
+              createImmunizationsCards();
+              break;
+            case 'conditions':
+              createConditionsCards();
+              break;
+            default:
+              console.error(`Unknown resource type: ${resourceType}`);
+          }
+        }
+
+        // Create allergies cards
+        function createAllergiesCards() {
+          const cardContainer = document.getElementById('resource-cards');
+          
+          // Card 1: Expanded card with content
+          const card1 = createExpandableCard('Allergy: Penicillin', 'allergy-1', true);
+          cardContainer.appendChild(card1);
+          
+          const content1 = `
+            <div class="allergy-item">
+              <h4>Penicillin</h4>
+              <p><strong>Status:</strong> Active</p>
+              <p><strong>Category:</strong> Medication</p>
+              <p><strong>Criticality:</strong> High</p>
+              <p><strong>Reaction:</strong> Hives, Difficulty breathing</p>
+              <p><strong>Onset:</strong> 2020-05-10</p>
+            </div>
+          `;
+          setCardContent('allergy-1', content1);
+          
+          // Card 2: Collapsed card with content
+          const card2 = createExpandableCard('Allergy: Peanuts', 'allergy-2', false);
+          cardContainer.appendChild(card2);
+          
+          const content2 = `
+            <div class="allergy-item">
+              <h4>Peanuts</h4>
+              <p><strong>Status:</strong> Active</p>
+              <p><strong>Category:</strong> Food</p>
+              <p><strong>Criticality:</strong> High</p>
+              <p><strong>Reaction:</strong> Anaphylaxis</p>
+              <p><strong>Onset:</strong> Childhood</p>
+            </div>
+          `;
+          setCardContent('allergy-2', content2);
+          
+          // Card 3: Loading state
+          const card3 = createExpandableCard('Allergy: Loading...', 'allergy-3', false);
+          cardContainer.appendChild(card3);
+          setCardContent('allergy-3', createLoadingIndicator('Loading allergy data...'));
+        }
+
+        // Create medications cards
+        function createMedicationsCards() {
+          const cardContainer = document.getElementById('resource-cards');
+          
+          // Card 1: Medication with content
+          const card1 = createExpandableCard('Medication: Lisinopril', 'med-1', true);
+          cardContainer.appendChild(card1);
+          
+          const content1 = `
+            <div class="allergy-item">
+              <h4>Lisinopril 10mg</h4>
+              <p><strong>Status:</strong> Active</p>
+              <p><strong>Dosage:</strong> 1 tablet daily</p>
+              <p><strong>Started:</strong> 2021-03-15</p>
+              <p><strong>Prescriber:</strong> Dr. Smith</p>
+            </div>
+          `;
+          setCardContent('med-1', content1);
+          
+          // Card 2: Error state
+          const card2 = createExpandableCard('Medication: Error', 'med-2', false);
+          cardContainer.appendChild(card2);
+          setCardContent('med-2', createCardError('Failed to load medication data', 'CONTENT_ERROR'));
+        }
+
+        // Create immunizations cards
+        function createImmunizationsCards() {
+          const cardContainer = document.getElementById('resource-cards');
+          
+          // No data state
+          setCardContent('resource-cards', createNoDataMessage('Immunizations', 'No immunization records found for this patient.'));
+        }
+
+        // Create conditions cards
+        function createConditionsCards() {
+          const cardContainer = document.getElementById('resource-cards');
+          
+          // Card 1: Condition with content
+          const card1 = createExpandableCard('Condition: Hypertension', 'cond-1', true);
+          cardContainer.appendChild(card1);
+          
+          const content1 = `
+            <div class="allergy-item">
+              <h4>Essential Hypertension</h4>
+              <p><strong>Status:</strong> Active</p>
+              <p><strong>Category:</strong> Problem-list-item</p>
+              <p><strong>Onset:</strong> 2019-01-10</p>
+              <p><strong>Severity:</strong> Moderate</p>
+            </div>
+          `;
+          setCardContent('cond-1', content1);
+        }
+      });
+    </script>
+  </div>
+</body>
+</html>
