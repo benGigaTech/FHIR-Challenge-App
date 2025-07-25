@@ -644,7 +644,7 @@
             "description": "Develop a CONTRIBUTING.md file that outlines development standards, code review process, and contribution workflow for the project.",
             "dependencies": [],
             "details": "Create a CONTRIBUTING.md file in the project root with the following sections:\n- Introduction to the contribution process\n- Development environment setup\n- Coding standards and style guidelines\n- Git workflow (branching strategy, commit message format)\n- Pull request process and review criteria\n- Testing requirements for contributions\n- Documentation requirements\n- Contact information for project maintainers\n\nInclude examples of good commit messages and PR descriptions to guide contributors.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Review the CONTRIBUTING.md file for clarity and completeness. Ensure it provides sufficient guidance for new contributors and aligns with the project's development practices."
           },
           {
@@ -684,7 +684,7 @@
     ],
     "metadata": {
       "created": "2025-07-24T16:46:12.928Z",
-      "updated": "2025-07-25T15:15:54.938Z",
+      "updated": "2025-07-25T15:16:51.062Z",
       "description": "Tasks for master context"
     }
   }
