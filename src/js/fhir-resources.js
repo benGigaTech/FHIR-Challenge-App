@@ -7,7 +7,8 @@ import { FhirServerError, NetworkError, getAllergyDataWithRetry } from './fhir-c
 export const ResourceTypes = {
   ALLERGY: 'allergies',
   MEDICATION: 'medications',
-  IMMUNIZATION: 'immunizations'
+  IMMUNIZATION: 'immunizations',
+  MEDICATION_REQUEST: 'medication-requests'
 };
 
 /**
@@ -53,6 +54,10 @@ export async function fetchResourceData(client, patientId, resourceType, options
         return await getMedicationDataWithRetry(client, patientId, options);
       case ResourceTypes.IMMUNIZATION:
         return await getImmunizationDataWithRetry(client, patientId, options);
+      case ResourceTypes.MEDICATION_REQUEST:
+        // Import dynamically to avoid circular dependencies
+        const { getMedicationRequestDataWithRetry } = await import('./medication-request.js');
+        return await getMedicationRequestDataWithRetry(client, patientId, options);
       default:
         throw createError(
           FhirServerError.INVALID_PARAMETER,

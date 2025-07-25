@@ -246,6 +246,82 @@ footer {
   flex-wrap: wrap;
 }
 
+/* Resource-specific styling */
+/* Medication Request specific styling */
+.medication-request-card {
+  border-left: 4px solid #9b59b6; /* Purple color for medication requests */
+}
+
+.medication-request-card .card-header {
+  background-color: rgba(155, 89, 182, 0.1);
+}
+
+.medication-request-card .medication-name {
+  font-weight: bold;
+  color: #9b59b6;
+  margin-bottom: 8px;
+}
+
+.medication-request-card .medication-status {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.medication-request-card .status-active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.medication-request-card .status-completed {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.medication-request-card .status-stopped {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.medication-request-card .status-draft {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.medication-request-card .medication-details {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.medication-request-card .medication-detail-item {
+  margin-bottom: 5px;
+  display: flex;
+}
+
+.medication-request-card .detail-label {
+  font-weight: bold;
+  min-width: 120px;
+  color: #555;
+}
+
+.medication-request-card .dosage-instructions {
+  margin-top: 10px;
+  padding: 8px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #9b59b6;
+}
+
+.medication-request-card .notes {
+  margin-top: 10px;
+  font-style: italic;
+  color: #666;
+}
+
 .resource-selector label {
   font-weight: bold;
   color: #2c3e50;

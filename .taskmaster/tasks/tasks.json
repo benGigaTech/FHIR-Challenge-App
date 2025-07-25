@@ -770,7 +770,7 @@
             "description": "Implement the medication-request.js module with functions to query the FHIR server for active MedicationRequest resources and process the response data for display.",
             "dependencies": [],
             "details": "Create the src/js/medication-request.js file with two main functions: getMedicationRequests to fetch data from the FHIR server with proper error handling, and processMedicationData to transform the raw FHIR resources into a structured format suitable for UI display. Include proper documentation and export both functions.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Test the module by creating a mock FHIR client and patient ID, then verify that getMedicationRequests correctly calls client.request with the proper parameters. Also test processMedicationData with sample FHIR response data to ensure it correctly extracts and formats medication information."
           },
           {
@@ -781,7 +781,7 @@
               "24.1"
             ],
             "details": "Create src/js/medication-display.js with the displayMedicationData function that takes processed medication data and a target element ID. The function should create a summary header showing the count of medications, generate a formatted list of medications with details like dosage and prescriber information, and include a toggle button to show/hide the raw JSON data.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test the display function with sample medication data and a mock DOM element. Verify that it correctly renders the medication list, formats the details properly, and that the JSON toggle button works as expected."
           },
           {
@@ -790,7 +790,7 @@
             "description": "Extend the expandable cards UI to include a dedicated section for medications with proper loading states.",
             "dependencies": [],
             "details": "Update the src/js/expandable-cards.js file to add a createMedicationCard function that generates an expandable card specifically for medications. The card should have a loading state initially and be properly integrated with the existing expandable card system. Ensure the card has a unique ID for content targeting.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Test the function by calling it with a mock container element and verify that it correctly creates an expandable card with the proper structure, IDs, and initial loading state."
           },
           {
@@ -966,7 +966,7 @@
     ],
     "metadata": {
       "created": "2025-07-24T16:46:12.928Z",
-      "updated": "2025-07-25T16:19:20.608Z",
+      "updated": "2025-07-25T16:23:16.445Z",
       "description": "Tasks for master context"
     }
   }

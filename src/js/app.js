@@ -183,6 +183,116 @@ function updateConnectionInfo() {
 }
 
 /**
+ * Initialize resource selector
+ * Creates a resource type selector and adds it to the resource selector container
+ */
+function initializeResourceSelector() {
+  // Check if the container exists
+  if (!resourceSelectorContainer) {
+    console.error('Resource selector container not found');
+    return;
+  }
+  
+  // Create resource cards container if it doesn't exist
+  if (!document.getElementById('resource-cards')) {
+    const cardContainer = createResourceCardContainer('resource-cards');
+    resourceContainer.appendChild(cardContainer);
+  }
+  
+  // Define resource types
+  const resourceTypes = [
+    { id: ResourceTypes.ALLERGY, name: 'Allergies' },
+    { id: ResourceTypes.MEDICATION, name: 'Medications' },
+    { id: ResourceTypes.IMMUNIZATION, name: 'Immunizations' },
+    { id: ResourceTypes.MEDICATION_REQUEST, name: 'Medication Requests' }
+  ];
+  
+  // Create resource selector
+  const resourceSelector = createResourceTypeSelector(resourceTypes, handleResourceSelect, currentResourceType);
+  resourceSelectorContainer.innerHTML = '';
+  resourceSelectorContainer.appendChild(resourceSelector);
+}
+
+/**
+ * Handle resource type selection
+ * @param {string} resourceType - Selected resource type
+ */
+async function handleResourceSelect(resourceType) {
+  console.log(`Selected resource type: ${resourceType}`);
+  currentResourceType = resourceType;
+  await loadResourceData(resourceType);
+}
+
+/**
+ * Load resource data based on the selected resource type
+ * @param {string} resourceType - Type of resource to load
+ * @returns {Promise<void>}
+ */
+async function loadResourceData(resourceType) {
+  try {
+    // Show loading state
+    showLoadingState(`Loading ${resourceType} data...`);
+    
+    // Get patient ID
+    const patientId = fhirClient.patient.id;
+    
+    if (!patientId) {
+      throw createError(
+        PatientContextError.MISSING_PATIENT_ID,
+        'Patient ID is missing',
+        { help: 'Please ensure you have selected a patient in the EHR.' }
+      );
+    }
+    
+    // Fetch resource data using the appropriate function based on resource type
+    const resources = await fetchResourceData(fhirClient, patientId, resourceType);
+    
+    // Store data for export
+    window.currentResourceData = resources;
+    
+    // Display resources in the UI
+    displayResources(resources, resourceType);
+    
+    // Display raw JSON data
+    displayJsonData(resources, 'json-display-area', {
+      title: `Raw ${capitalizeFirstLetter(resourceType)} Data (FHIR R4)`,
+      showCopyButton: true,
+      showLineNumbers: true
+    });
+    
+    hideLoadingState();
+  } catch (error) {
+    console.error(`Error loading ${resourceType} data:`, error);
+    hideLoadingState();
+    
+    // Display error message
+    const errorMessage = error.message || `Failed to load ${resourceType} data`;
+    const errorType = error.type || 'DATA_LOAD_ERROR';
+    const errorHelp = error.details?.help || 'Please try again later';
+    
+    // Set error content in the card container
+    const cardContainer = document.getElementById('resource-cards');
+    if (cardContainer) {
+      setCardContent('resource-cards', createCardError(
+        errorMessage,
+        errorType,
+        errorHelp
+      ));
+    }
+    
+    // Show error in JSON display
+    displayJsonData({ 
+      error: errorMessage,
+      type: errorType,
+      timestamp: new Date().toISOString(),
+      details: error.details || {}
+    }, 'json-display-area', {
+      title: `Error Loading ${capitalizeFirstLetter(resourceType)}`
+    });
+  }
+}
+
+/**
  * Initialize patient context and load patient data
  * @returns {Promise<void>}
  */
@@ -432,13 +542,15 @@ function displayResources(resources, resourceType) {
 function getResourceCardTitle(resource, resourceType) {
   switch (resourceType) {
     case ResourceTypes.ALLERGY:
-      return `Allergy: ${resource.substance?.display || resource.code || 'Unknown'}`;
+      return resource.display || 'Unknown Allergy';
     case ResourceTypes.MEDICATION:
-      return `Medication: ${resource.medicationDisplay || 'Unknown'}`;
+      return resource.medicationDisplay || 'Unknown Medication';
     case ResourceTypes.IMMUNIZATION:
-      return `Immunization: ${resource.vaccineDisplay || 'Unknown'}`;
+      return resource.vaccineDisplay || 'Unknown Vaccine';
+    case ResourceTypes.MEDICATION_REQUEST:
+      return resource.medicationDisplay || 'Unknown Medication Request';
     default:
-      return `Resource: ${resource.id || 'Unknown'}`;
+      return 'Unknown Resource';
   }
 }
 
@@ -456,12 +568,10 @@ function formatResourceCardContent(resource, resourceType) {
       return formatMedicationContent(resource);
     case ResourceTypes.IMMUNIZATION:
       return formatImmunizationContent(resource);
+    case ResourceTypes.MEDICATION_REQUEST:
+      return formatMedicationRequestContent(resource);
     default:
-      return `<div class="allergy-item">
-        <h4>Unknown Resource Type</h4>
-        <p>Resource ID: ${resource.id || 'Unknown'}</p>
-        <p>Resource Type: ${resource.resourceType || 'Unknown'}</p>
-      </div>`;
+      return `<div class="card-content"><p>No formatted content available for ${resourceType}</p></div>`;
   }
 }
 
@@ -471,11 +581,16 @@ function formatResourceCardContent(resource, resourceType) {
  * @returns {string} Formatted HTML content
  */
 function formatAllergyContent(allergy) {
+  // Handle different code structure formats
+  const allergyName = allergy.substance?.display || 
+                     allergy.code?.display || 
+                     allergy.code?.text || 
+                     (typeof allergy.code === 'string' ? allergy.code : 'Unknown Substance');
+  
   return `
     <div class="allergy-item">
-      <h4>${allergy.substance?.display || allergy.code || 'Unknown Substance'}</h4>
-      <p><strong>Status:</strong> ${allergy.clinicalStatus || 'Unknown'} ${allergy.verificationStatus ? `(${allergy.verificationStatus})` : ''}</p>
-      <p><strong>Category:</strong> ${allergy.category || 'Unknown'}</p>
+      <h4>${allergyName}</h4>
+      <p><strong>Category:</strong> ${Array.isArray(allergy.category) ? allergy.category.join(', ') : allergy.category || 'Unknown'}</p>
       <p><strong>Criticality:</strong> ${allergy.criticality || 'Unknown'}</p>
       ${allergy.reactions && allergy.reactions.length > 0 ? 
         `<p><strong>Reaction:</strong> ${allergy.reactions.map(r => r.manifestation || 'Unknown').join(', ')}</p>` : 
@@ -513,15 +628,98 @@ function formatMedicationContent(medication) {
  */
 function formatImmunizationContent(immunization) {
   return `
-    <div class="allergy-item">
+    <div class="immunization-item">
       <h4>${immunization.vaccineDisplay || 'Unknown Vaccine'}</h4>
       <p><strong>Status:</strong> ${immunization.status || 'Unknown'}</p>
-      ${immunization.occurrenceDate ? `<p><strong>Date:</strong> ${formatDate(immunization.occurrenceDate)}</p>` : ''}
-      ${immunization.performer ? `<p><strong>Performer:</strong> ${immunization.performer.display || 'Unknown'}</p>` : ''}
+      <p><strong>Date:</strong> ${immunization.occurrenceDate ? formatDate(immunization.occurrenceDate) : 'Unknown'}</p>
+      ${immunization.manufacturer ? `<p><strong>Manufacturer:</strong> ${immunization.manufacturer}</p>` : ''}
       ${immunization.lotNumber ? `<p><strong>Lot Number:</strong> ${immunization.lotNumber}</p>` : ''}
       ${immunization.site ? `<p><strong>Site:</strong> ${immunization.site}</p>` : ''}
       ${immunization.route ? `<p><strong>Route:</strong> ${immunization.route}</p>` : ''}
-      ${immunization.note ? `<p><strong>Note:</strong> ${immunization.note}</p>` : ''}
+    </div>
+  `;
+}
+
+/**
+ * Format medication request content
+ * @param {Object} medicationRequest - MedicationRequest resource
+ * @returns {string} Formatted HTML content
+ */
+function formatMedicationRequestContent(medicationRequest) {
+  // Get status class based on medication request status
+  const getStatusClass = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'active': return 'status-active';
+      case 'completed': return 'status-completed';
+      case 'stopped': 
+      case 'cancelled': 
+      case 'on-hold': return 'status-stopped';
+      case 'draft': 
+      case 'entered-in-error': return 'status-draft';
+      default: return '';
+    }
+  };
+  
+  // Format dosage instructions
+  const formatDosage = (dosageInstructions) => {
+    if (!dosageInstructions || dosageInstructions.length === 0) {
+      return '';
+    }
+    
+    // Take the first dosage instruction (most common case)
+    const dosage = dosageInstructions[0];
+    let dosageText = '';
+    
+    // Add dosage text if available
+    if (typeof dosage === 'string') {
+      dosageText = dosage;
+    } else if (dosage.text) {
+      dosageText = dosage.text;
+    } else {
+      // Construct dosage from components if available
+      const doseQuantity = dosage.doseAndRate?.[0]?.doseQuantity;
+      const timing = dosage.timing?.code?.text || dosage.timing?.code?.coding?.[0]?.display;
+      const route = dosage.route?.coding?.[0]?.display;
+      
+      if (doseQuantity) {
+        dosageText += `${doseQuantity.value} ${doseQuantity.unit || ''}`;
+      }
+      
+      if (route) {
+        dosageText += dosageText ? ` ${route}` : route;
+      }
+      
+      if (timing) {
+        dosageText += dosageText ? ` ${timing}` : timing;
+      }
+    }
+    
+    return dosageText ? `<div class="dosage-instructions">${dosageText}</div>` : '';
+  };
+  
+  return `
+    <div class="medication-request-card">
+      <div class="medication-name">${medicationRequest.medicationDisplay || 'Unknown Medication'}</div>
+      
+      <div class="medication-status ${getStatusClass(medicationRequest.status)}">
+        ${medicationRequest.status || 'Unknown'}
+      </div>
+      
+      <div class="medication-details">
+        <div class="medication-detail-item">
+          <span class="detail-label">Prescribed:</span>
+          <span>${medicationRequest.authoredOn ? formatDate(medicationRequest.authoredOn) : 'Unknown'}</span>
+        </div>
+        
+        <div class="medication-detail-item">
+          <span class="detail-label">Prescriber:</span>
+          <span>${medicationRequest.requester ? medicationRequest.requester.display || 'Unknown' : 'Unknown'}</span>
+        </div>
+        
+        ${medicationRequest.dosageInstructions ? formatDosage(medicationRequest.dosageInstructions) : ''}
+        
+        ${medicationRequest.note ? `<div class="notes">${medicationRequest.note}</div>` : ''}
+      </div>
     </div>
   `;
 }

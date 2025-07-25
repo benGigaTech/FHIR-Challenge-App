@@ -81,6 +81,17 @@ This document provides comprehensive guidance for troubleshooting common issues 
   - Implement fallback display logic
   - Log and report malformed resources
 
+#### Issue: Missing or Incomplete Medication Request Data
+- **Symptoms**: Medication requests not showing or missing details (medication name, dosage, status)
+- **Possible Causes**:
+  - Incomplete MedicationRequest resources
+  - Missing medication references
+  - Complex dosage instructions not parsed correctly
+- **Solutions**:
+  - Implement robust medication reference resolution
+  - Add fallback display for complex dosage instructions
+  - Handle both contained and referenced medications
+
 #### Issue: Formatting Problems
 - **Symptoms**: Data displayed incorrectly, misaligned elements
 - **Possible Causes**:
@@ -149,6 +160,10 @@ npm run test:e2e
 - [ ] All patient allergies are displayed
 - [ ] Allergy details are complete and accurate
 - [ ] "No allergies" message appears when appropriate
+- [ ] All patient medication requests are displayed
+- [ ] Medication request details (medication name, status, dosage) are complete and accurate
+- [ ] Status indicators are correctly colored based on medication status
+- [ ] "No medication requests" message appears when appropriate
 - [ ] Error states are handled gracefully
 
 #### Browser Compatibility
@@ -187,7 +202,9 @@ npm run test:e2e
 |------------|---------|-------|------------|
 | APP-001 | "No patient context" | Missing launch context | Ensure proper launch sequence |
 | APP-002 | "Failed to render allergies" | Data processing error | Check browser console for details |
-| APP-003 | "Browser not supported" | Incompatible browser | Use supported browser version |
+| APP-003 | "Failed to render medication requests" | Data processing error | Check browser console for details |
+| APP-004 | "Medication reference resolution failed" | Unable to resolve medication references | Verify medication references exist and are accessible |
+| APP-005 | "Browser not supported" | Incompatible browser | Use supported browser version |
 
 ## Debugging Tools
 
