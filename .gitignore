@@ -28,3 +28,6 @@ node_modules/
 /.taskmaster/*
 /.windsurf/*
 hl7-fhir.md
+project.md
+prd.txt
+plan.md
