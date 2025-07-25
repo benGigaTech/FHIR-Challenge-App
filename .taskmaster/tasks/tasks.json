@@ -1,0 +1,691 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 13,
+        "title": "Initialize Project Structure and Dependencies",
+        "description": "Set up the npm project with proper configuration, create the basic file structure, and install necessary dependencies.",
+        "details": "1. Create a new directory for the project\n2. Initialize npm project: `npm init -y`\n3. Create the following directory structure:\n   - src/\n   - src/js/\n   - src/css/\n4. Install http-server: `npm install --save-dev http-server`\n5. Configure package.json with scripts:\n   ```json\n   \"scripts\": {\n     \"serve\": \"http-server src -p 8080 --cors\"\n   }\n   ```\n6. Install FHIR client library: `npm install fhirclient`\n7. Create basic HTML files:\n   - src/launch.html (SMART launch entry point)\n   - src/index.html (main application page)\n8. Add .gitignore file for node_modules and other build artifacts",
+        "testStrategy": "Verify project structure is correctly set up by running `npm run serve` and confirming the server starts on http://127.0.0.1:8080/. Check that all directories exist and package.json contains correct configuration.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Initialize npm project and create directory structure",
+            "description": "Create the project directory, initialize npm, and set up the basic folder structure for the application.",
+            "dependencies": [],
+            "details": "1. Create a new directory for the project\n2. Navigate to the directory in terminal\n3. Run `npm init -y` to initialize npm with default settings\n4. Create the following directories:\n   - src/\n   - src/js/\n   - src/css/\n5. Create a .gitignore file with the following content:\n   ```\n   node_modules/\n   .DS_Store\n   *.log\n   .vscode/\n   ```",
+            "status": "done",
+            "testStrategy": "Verify that the directory structure exists and npm initialization created a valid package.json file."
+          },
+          {
+            "id": 2,
+            "title": "Install and configure development dependencies",
+            "description": "Install the http-server for local development and configure package.json scripts.",
+            "dependencies": [
+              "13.1"
+            ],
+            "details": "1. Install http-server as a development dependency:\n   `npm install --save-dev http-server`\n2. Open package.json and update the scripts section:\n   ```json\n   \"scripts\": {\n     \"serve\": \"http-server src -p 8080 --cors\",\n     \"start\": \"npm run serve\"\n   }\n   ```\n3. Verify the package.json has correct configuration for scripts and dependencies.",
+            "status": "done",
+            "testStrategy": "Run `npm run serve` and confirm the server starts successfully on http://127.0.0.1:8080/."
+          },
+          {
+            "id": 3,
+            "title": "Install FHIR client library",
+            "description": "Install the FHIR client library needed for SMART on FHIR integration.",
+            "dependencies": [
+              "13.1"
+            ],
+            "details": "1. Install the FHIR client library:\n   `npm install fhirclient`\n2. Create a src/js/lib directory\n3. Copy the fhirclient library from node_modules to make it accessible in the browser:\n   `mkdir -p src/js/lib`\n   `cp node_modules/fhirclient/build/fhirclient.js src/js/lib/`\n4. Verify the library is correctly installed by checking package.json dependencies.",
+            "status": "done",
+            "testStrategy": "Verify that fhirclient is listed in package.json dependencies and the library file is accessible in the src/js/lib directory."
+          },
+          {
+            "id": 4,
+            "title": "Create launch.html entry point",
+            "description": "Create the SMART on FHIR launch entry point HTML file that initiates the authorization process.",
+            "dependencies": [
+              "13.3"
+            ],
+            "details": "1. Create src/launch.html with the following content:\n   ```html\n   <!DOCTYPE html>\n   <html lang=\"en\">\n   <head>\n     <meta charset=\"UTF-8\">\n     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n     <title>SMART on FHIR Launch</title>\n     <script src=\"./js/lib/fhirclient.js\"></script>\n   </head>\n   <body>\n     <h1>Launching SMART on FHIR App...</h1>\n     <script>\n       // Initiate the SMART authorization sequence\n       FHIR.oauth2.authorize({\n         clientId: 'my_web_app',\n         scope: 'launch patient/*.read',\n         redirectUri: 'index.html',\n         completeInTarget: true\n       });\n     </script>\n   </body>\n   </html>\n   ```",
+            "status": "done",
+            "testStrategy": "Open launch.html in a browser and verify it displays the launch message. The actual authorization won't work until connected to a FHIR server."
+          },
+          {
+            "id": 5,
+            "title": "Create index.html main application page",
+            "description": "Create the main application HTML file that will display after successful authorization.",
+            "dependencies": [
+              "13.4"
+            ],
+            "details": "1. Create src/index.html with the following content:\n   ```html\n   <!DOCTYPE html>\n   <html lang=\"en\">\n   <head>\n     <meta charset=\"UTF-8\">\n     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n     <title>GigaTECH SMART on FHIR Allergy Display</title>\n     <script src=\"./js/lib/fhirclient.js\"></script>\n     <link rel=\"stylesheet\" href=\"./css/styles.css\">\n   </head>\n   <body>\n     <div class=\"container\">\n       <header>\n         <h1>Patient Allergy Information</h1>\n         <div id=\"patient-banner\"></div>\n       </header>\n       <main>\n         <section id=\"allergies-container\">\n           <h2>Allergies</h2>\n           <div id=\"allergies-list\">Loading allergies...</div>\n         </section>\n       </main>\n       <footer>\n         <p>GigaTECH SMART on FHIR Application</p>\n       </footer>\n     </div>\n     <script src=\"./js/app.js\"></script>\n   </body>\n   </html>\n   ```\n2. Create a basic src/css/styles.css file:\n   ```css\n   body {\n     font-family: Arial, sans-serif;\n     margin: 0;\n     padding: 0;\n   }\n   .container {\n     max-width: 1200px;\n     margin: 0 auto;\n     padding: 20px;\n   }\n   header {\n     margin-bottom: 20px;\n   }\n   footer {\n     margin-top: 40px;\n     text-align: center;\n     color: #666;\n   }\n   ```\n3. Create an empty src/js/app.js file for future implementation.",
+            "status": "done",
+            "testStrategy": "Open index.html in a browser and verify the basic structure renders correctly with appropriate styling."
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Implement SMART Launch HTML Entry Point",
+        "description": "Create the launch.html entry point that initiates the SMART on FHIR launch sequence and handles the redirect to the authorization server.",
+        "details": "1. Create launch.html with basic HTML structure\n2. Add FHIR client library script\n3. Implement launch sequence using SMART JS client:\n   ```javascript\n   // src/launch.html\n   <!DOCTYPE html>\n   <html lang=\"en\">\n   <head>\n     <meta charset=\"UTF-8\">\n     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n     <title>SMART on FHIR Launch</title>\n     <script src=\"./node_modules/fhirclient/build/fhirclient.js\"></script>\n   </head>\n   <body>\n     <script>\n       // Initiate the SMART authorization sequence\n       FHIR.oauth2.authorize({\n         clientId: 'my_app',\n         scope: 'launch patient/*.read',\n         redirectUri: 'http://127.0.0.1:8080/index.html',\n         completeInTarget: true\n       });\n     </script>\n   </body>\n   </html>\n   ```\n4. Ensure the launch URL parameters are properly handled\n5. Test with the provided launch URL in the PRD",
+        "testStrategy": "Test the launch sequence by accessing the provided launch URL: http://127.0.0.1:8080/launch.html?launch=eyJhIjoiMSJ9&iss=https%3A%2F%2Flaunch.smarthealthit.org%2Fv%2Fr4%2Ffhir. Verify that it redirects to the authorization server and handles the OAuth2 flow initiation correctly.",
+        "priority": "high",
+        "dependencies": [
+          13
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Basic HTML Structure for Launch Page",
+            "description": "Create the launch.html file with the basic HTML structure including proper DOCTYPE, meta tags, and title.",
+            "dependencies": [],
+            "details": "Create a new file named launch.html in the src directory. Set up the HTML5 document structure with appropriate DOCTYPE declaration, UTF-8 charset, viewport meta tag for responsive design, and a descriptive title 'SMART on FHIR Launch'. The basic structure should include <html>, <head>, and <body> tags with no content yet.",
+            "status": "done",
+            "testStrategy": "Validate the HTML structure using W3C validator to ensure it follows HTML5 standards. Check that the file is created in the correct location and has the proper DOCTYPE and meta tags."
+          },
+          {
+            "id": 2,
+            "title": "Add FHIR Client Library Integration",
+            "description": "Include the FHIR client library script in the launch page to enable SMART on FHIR functionality.",
+            "dependencies": [
+              "14.1"
+            ],
+            "details": "Add a script tag in the <head> section that references the FHIR client library from node_modules: <script src=\"./node_modules/fhirclient/build/fhirclient.js\"></script>. Ensure the path is correct relative to the location of launch.html. This script provides the FHIR.oauth2 namespace needed for the authorization process.",
+            "status": "done",
+            "testStrategy": "Check that the script loads correctly by opening the launch.html file in a browser and verifying no 404 errors for the script in the browser console. Confirm the FHIR object is available in the global scope by typing FHIR in the console."
+          },
+          {
+            "id": 3,
+            "title": "Implement SMART Authorization Sequence",
+            "description": "Add the JavaScript code that initiates the SMART on FHIR authorization sequence using the FHIR client library.",
+            "dependencies": [
+              "14.2"
+            ],
+            "details": "Add a <script> tag in the <body> section that calls FHIR.oauth2.authorize() with the appropriate configuration. Include clientId ('my_app'), scope ('launch patient/*.read'), redirectUri ('http://127.0.0.1:8080/index.html'), and set completeInTarget to true. This will initiate the OAuth2 authorization code flow when the page loads.",
+            "status": "done",
+            "testStrategy": "Test by opening the launch.html page in a browser and checking the network tab to verify it attempts to redirect to the authorization server. Verify the correct parameters are being sent in the authorization request."
+          },
+          {
+            "id": 4,
+            "title": "Implement Launch Context Parameter Handling",
+            "description": "Add code to extract and process the launch context parameters (launch and iss) from the URL query string.",
+            "dependencies": [
+              "14.3"
+            ],
+            "details": "Modify the authorization script to dynamically extract the 'launch' and 'iss' parameters from the URL. Use URLSearchParams to parse the query string and pass these values to the FHIR.oauth2.authorize() function. This ensures the launch context is properly passed to the authorization server. Add error handling to display a message if required parameters are missing.\n<info added on 2025-07-25T11:58:56.119Z>\nImplemented launch context parameter handling in launch.html. The code now extracts the 'launch' and 'iss' parameters from the URL using URLSearchParams API. Added validation logic to check if these required parameters are present and displays an appropriate error message to the user if they're missing. The FHIR.oauth2.authorize() function now receives these dynamically extracted parameters instead of hardcoded values, ensuring proper launch context transmission to the authorization server. Implemented comprehensive error handling with try-catch blocks to capture and display any authorization errors that might occur during the process, improving the user experience by providing clear feedback about authorization issues.\n</info added on 2025-07-25T11:58:56.119Z>",
+            "status": "done",
+            "testStrategy": "Test with different URL parameter combinations including the provided test URL: http://127.0.0.1:8080/launch.html?launch=eyJhIjoiMSJ9&iss=https%3A%2F%2Flaunch.smarthealthit.org%2Fv%2Fr4%2Ffhir. Verify the parameters are correctly extracted and passed to the authorization function."
+          },
+          {
+            "id": 5,
+            "title": "Add Loading Indicator and Error Handling",
+            "description": "Implement a loading indicator and basic error handling for the launch process to improve user experience.",
+            "dependencies": [
+              "14.4"
+            ],
+            "details": "Add HTML elements to show a loading spinner while the authorization redirect is being prepared. Implement try-catch blocks around the FHIR.oauth2.authorize() call to catch and display any errors that occur during the launch process. Add a simple message in the body that explains the app is launching, which will be visible momentarily before the redirect occurs.\n<info added on 2025-07-25T12:00:57.487Z>\nEnhanced the launch.html file with a professional loading indicator using CSS animations that shows a spinning wheel during the authorization process. Added comprehensive error handling with color-coded messages for different error scenarios including missing launch parameters, missing iss parameters, and authorization failures. Implemented a timeout detection system that displays a helpful message after 15 seconds suggesting possible server connectivity issues. Created a more robust error handling architecture with specific, user-friendly error messages for each potential failure mode. Improved the UI with centered content, consistent styling, and status messages that update in real-time to keep users informed throughout the authorization flow. All error handling is wrapped in try-catch blocks to gracefully handle unexpected exceptions and provide meaningful feedback to users.\n</info added on 2025-07-25T12:00:57.487Z>",
+            "status": "done",
+            "testStrategy": "Test error scenarios by intentionally providing invalid parameters or disconnecting from the network. Verify that appropriate error messages are displayed. Check that the loading indicator appears during the authorization process and disappears appropriately."
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Implement OAuth2 Authorization Flow",
+        "description": "Handle the OAuth2 authorization code flow, including token retrieval and secure storage for subsequent API calls.",
+        "details": "1. Create a JavaScript module for handling OAuth2 flow\n2. Implement token retrieval and storage in the main application page:\n   ```javascript\n   // src/js/auth.js\n   const handleAuth = async () => {\n     try {\n       // Complete the SMART authorization flow\n       const client = await FHIR.oauth2.ready();\n       console.log('Successfully authenticated');\n       return client;\n     } catch (error) {\n       console.error('Authentication error:', error);\n       document.getElementById('error').textContent = \n         'Authentication failed: ' + error.message;\n     }\n   };\n   ```\n3. Add this script to index.html\n4. Implement secure token storage using browser sessionStorage\n5. Add error handling for authentication failures\n6. Ensure tokens are properly included in subsequent FHIR API requests",
+        "testStrategy": "Test the OAuth2 flow by launching the application and verifying successful authentication with the FHIR server. Check browser console for authentication success messages and inspect network requests to confirm proper authorization headers are being sent.",
+        "priority": "high",
+        "dependencies": [
+          14
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create OAuth2 Authorization Module",
+            "description": "Create a JavaScript module for handling the OAuth2 authorization flow, including the basic structure and necessary functions.",
+            "dependencies": [],
+            "details": "Create a new file src/js/auth.js with the basic structure for OAuth2 handling. Import the FHIR client library and define the handleAuth function that will manage the authorization flow. The function should use FHIR.oauth2.ready() to complete the SMART authorization flow and return the authenticated client. Include proper JSDoc comments for function documentation.\n<info added on 2025-07-25T12:06:49.590Z>\nCreated the auth.js module with comprehensive OAuth2 functionality. The module includes:\n\n1. Core authorize() function that completes the OAuth2 flow using FHIR.oauth2.ready()\n2. Token management functions for storing and retrieving tokens in sessionStorage\n3. Authentication status checking function to verify if user is authenticated\n4. Utility function for adding authorization headers to API requests\n5. Error handling for common authentication scenarios (expired tokens, invalid grants)\n6. Detailed JSDoc comments for all functions to improve code maintainability\n\nThe module provides a complete API for managing the OAuth2 flow and making authenticated requests to the FHIR server, successfully implementing the required functionality for the authorization flow.\n</info added on 2025-07-25T12:06:49.590Z>",
+            "status": "done",
+            "testStrategy": "Verify the module can be imported without errors. Check that the function signatures are correct and the module exports all necessary functions."
+          },
+          {
+            "id": 2,
+            "title": "Implement Token Retrieval and Error Handling",
+            "description": "Complete the handleAuth function implementation with proper error handling and logging for authentication failures.",
+            "dependencies": [
+              "15.1"
+            ],
+            "details": "Enhance the handleAuth function in src/js/auth.js to properly handle authentication errors. Implement try/catch blocks to capture and log authentication failures. Create a function to display error messages in the UI when authentication fails. Ensure console logging for both successful authentication and failures for debugging purposes.\n<info added on 2025-07-25T12:10:01.667Z>\nImplemented token retrieval and storage functionality in the auth.js module. Created functions for securely storing authentication tokens in sessionStorage with proper expiration handling. Added utility functions to retrieve tokens and check their validity. Implemented error handling for token-related operations. The implementation follows security best practices by storing only the necessary token information and checking token expiration before use.\n</info added on 2025-07-25T12:10:01.667Z>",
+            "status": "done",
+            "testStrategy": "Test with both valid and invalid credentials to ensure proper error handling. Verify error messages appear in the designated UI element and console logs show appropriate information."
+          },
+          {
+            "id": 3,
+            "title": "Implement Secure Token Storage",
+            "description": "Add functionality to securely store authentication tokens using browser sessionStorage and implement token refresh capabilities.",
+            "dependencies": [
+              "15.2"
+            ],
+            "details": "Create functions in auth.js to handle token storage in sessionStorage. Implement saveToken(token) and getToken() functions. Add a checkTokenExpiration() function that verifies if the current token is still valid based on its expiration time. Implement a refreshToken() function that can obtain a new token when the current one expires. Ensure all token operations are performed securely and handle edge cases like missing or corrupted tokens.\n<info added on 2025-07-25T12:16:48.932Z>\nEnhanced auth.js module with comprehensive security improvements for token management:\n\n1. Implemented selective token storage - only storing essential token data in sessionStorage while excluding sensitive information\n2. Added token structure validation to verify integrity before use\n3. Implemented token expiration checks with configurable refresh thresholds (refreshing tokens when they're within 5 minutes of expiration)\n4. Added functionality to recreate FHIR client instances from stored tokens\n5. Implemented automatic detection and clearing of invalid/corrupted tokens\n6. Added comprehensive error handling with user-friendly messages for various OAuth2 scenarios:\n   - Invalid token format\n   - Token expiration\n   - Refresh token failures\n   - Network connectivity issues during token operations\n   - Authorization server unavailability\n   - Invalid client credentials\n7. Added logging for token lifecycle events while ensuring no sensitive data is exposed in logs\n</info added on 2025-07-25T12:16:48.932Z>",
+            "status": "done",
+            "testStrategy": "Test token storage by authenticating and verifying tokens are correctly saved in sessionStorage. Test token retrieval and check that expired tokens trigger the refresh flow correctly."
+          },
+          {
+            "id": 4,
+            "title": "Integrate OAuth2 Module with Main Application",
+            "description": "Add the authentication module to the main application page and ensure it's properly initialized during application startup.",
+            "dependencies": [
+              "15.3"
+            ],
+            "details": "Add the auth.js script to index.html. Create an initialization function that runs when the page loads to start the authentication process. Implement a loading indicator that displays while authentication is in progress. Add event listeners to handle authentication state changes. Ensure the application only attempts to access protected resources after successful authentication.\n<info added on 2025-07-25T12:20:32.965Z>\nSuccessfully integrated the OAuth2 module with the main application. Enhanced app.js with authentication status indicators that visually represent different states (authenticating, authenticated, unauthenticated) through appropriate styling. Added a connection information panel displaying token expiration time and server connection details. Implemented comprehensive error handling with global handlers for both synchronous errors and unhandled promise rejections. All protected resources are now properly gated behind authentication checks, and users receive clear visual feedback throughout the authentication process.\n</info added on 2025-07-25T12:20:32.965Z>",
+            "status": "done",
+            "testStrategy": "Test the full application flow by loading the page and verifying the authentication process starts automatically. Check that protected content only appears after successful authentication and that the loading indicator works correctly."
+          },
+          {
+            "id": 5,
+            "title": "Implement Authorization Headers for API Requests",
+            "description": "Create utility functions to ensure authentication tokens are properly included in all subsequent FHIR API requests.",
+            "dependencies": [
+              "15.4"
+            ],
+            "details": "Create a function addAuthToRequest(request) in auth.js that adds the necessary authorization headers to outgoing API requests. Implement a wrapper function for fetch or axios that automatically adds authentication to all API calls. Create a function to check if the user is authenticated before making API calls. Add logic to handle cases where authentication fails during an API request, including automatic retries with token refresh when appropriate.\n<info added on 2025-07-25T12:23:24.304Z>\nCreated a comprehensive API utility module (api.js) that handles authorization headers for all FHIR API requests. The module provides functions for common FHIR operations (get, search, create, update, delete) with automatic token handling. Each function automatically adds the required authorization headers from the auth module. Implemented error handling specific to API requests, including authentication error detection. Updated the app.js file to use these new utility functions for patient and allergy data retrieval.\n</info added on 2025-07-25T12:23:24.304Z>",
+            "status": "done",
+            "testStrategy": "Test by making API requests to protected endpoints and verifying in network traffic that the correct authorization headers are being sent. Test the retry mechanism by manually expiring a token and confirming that requests are properly retried after token refresh."
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Extract Patient Context from Launch Parameters",
+        "description": "Retrieve and store the current patient context from the SMART launch parameters to ensure the correct patient data is displayed.",
+        "details": "1. Create a function to extract patient context from the authenticated FHIR client:\n   ```javascript\n   // src/js/patient-context.js\n   const getPatientContext = async (client) => {\n     try {\n       // Get patient ID from the FHIR client context\n       const patientId = client.patient.id;\n       \n       // Retrieve basic patient information\n       const patient = await client.patient.read();\n       \n       console.log('Patient context retrieved:', patient);\n       return {\n         id: patientId,\n         resource: patient\n       };\n     } catch (error) {\n       console.error('Error retrieving patient context:', error);\n       throw error;\n     }\n   };\n   ```\n2. Integrate this function with the main application flow\n3. Store patient context for use in subsequent API calls\n4. Add error handling for cases where patient context is missing\n5. Display basic patient information in the UI for verification",
+        "testStrategy": "Test by launching the application with the provided launch URL and verifying that the correct patient ID is extracted. Confirm that the patient context is properly stored and available for the allergy data retrieval. Test with the specified test patient (Ms. Mariana Acuna).",
+        "priority": "high",
+        "dependencies": [
+          15
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Patient Context Extraction Module",
+            "description": "Create a dedicated JavaScript module to extract and handle patient context from SMART launch parameters using the FHIR client.",
+            "dependencies": [],
+            "details": "Create a new file src/js/patient-context.js with the getPatientContext function as provided in the task description. Export this function to make it available for import in other modules. Add JSDoc comments to document the function parameters and return values. Ensure proper error handling for cases where the client is not properly initialized.",
+            "status": "done",
+            "testStrategy": "Test the function with a mock FHIR client object to verify it correctly extracts patient ID and retrieves patient information. Verify error handling by testing with invalid client objects."
+          },
+          {
+            "id": 2,
+            "title": "Integrate Patient Context with Application Initialization",
+            "description": "Modify the main application initialization flow to extract patient context after FHIR client authentication.",
+            "dependencies": [
+              "16.1"
+            ],
+            "details": "In the main application file (src/js/app.js or index.js), import the getPatientContext function. After successful FHIR client initialization, call getPatientContext and store the result. Add appropriate logging for debugging purposes. Implement a loading indicator while patient context is being retrieved.",
+            "status": "done",
+            "testStrategy": "Test by launching the application with the provided launch URL and verifying that the correct patient context is extracted and logged to the console."
+          },
+          {
+            "id": 3,
+            "title": "Create Patient Context Store",
+            "description": "Implement a mechanism to store and access patient context throughout the application.",
+            "dependencies": [
+              "16.2"
+            ],
+            "details": "Create a new file src/js/stores/patient-store.js that implements a simple store pattern for the patient context. Include methods for setting, getting, and checking if patient context exists. Use either a module pattern or a class-based approach. Consider using a publish-subscribe pattern to notify components when patient context changes.",
+            "status": "done",
+            "testStrategy": "Test the store by setting mock patient data and verifying it can be retrieved correctly. Test edge cases like attempting to get patient data before it's set."
+          },
+          {
+            "id": 4,
+            "title": "Implement Error Handling for Missing Patient Context",
+            "description": "Add robust error handling for cases where patient context is missing or cannot be retrieved.",
+            "dependencies": [
+              "16.3"
+            ],
+            "details": "Create a function to validate patient context and handle error cases. Implement user-friendly error messages when patient context is missing. Add a recovery mechanism that attempts to re-fetch patient context if initial retrieval fails. Create a dedicated error display component or notification system to show context-related errors.",
+            "status": "done",
+            "testStrategy": "Test by simulating scenarios where patient context is missing or invalid. Verify appropriate error messages are displayed and recovery mechanisms are triggered."
+          },
+          {
+            "id": 5,
+            "title": "Display Basic Patient Information in UI",
+            "description": "Create a UI component to display basic patient information as verification that the correct patient context was loaded.",
+            "dependencies": [
+              "16.3"
+            ],
+            "details": "Create a new component (src/js/components/patient-banner.js or similar) that displays basic patient information like name, gender, birth date, and MRN. Style the component to be visible but unobtrusive at the top of the application. Ensure the component updates if patient context changes. Format the displayed information appropriately (e.g., format dates, display full name).",
+            "status": "done",
+            "testStrategy": "Test the component with various patient data formats to ensure it displays correctly. Verify it updates when patient context changes. Test with the specified test patient (Ms. Mariana Acuna) to confirm correct display."
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "Implement FHIR Client for AllergyIntolerance Queries",
+        "description": "Set up the authenticated FHIR client and implement the query to retrieve AllergyIntolerance resources for the current patient.",
+        "details": "1. Create a module for FHIR data retrieval:\n   ```javascript\n   // src/js/fhir-client.js\n   const getAllergyData = async (client, patientId) => {\n     try {\n       // Query for AllergyIntolerance resources\n       const allergies = await client.request(`AllergyIntolerance?patient=${patientId}`, {\n         resolveReferences: ['patient', 'asserter'],\n         pageLimit: 0,\n         flat: true\n       });\n       \n       console.log('Retrieved allergy data:', allergies);\n       return allergies;\n     } catch (error) {\n       console.error('Error retrieving allergy data:', error);\n       throw error;\n     }\n   };\n   ```\n2. Ensure proper error handling for failed queries\n3. Implement pagination handling for large result sets\n4. Add logging for debugging purposes\n5. Handle cases where no allergies are found\n6. Ensure the query follows the FHIR R4 specification",
+        "testStrategy": "Test by launching the application and verifying that AllergyIntolerance resources are successfully retrieved from the FHIR server. Check network requests to confirm the correct query URL is being used. Test with the specified test patient to ensure allergies are found.",
+        "priority": "high",
+        "dependencies": [
+          16
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create FHIR Client Module Structure",
+            "description": "Set up the basic structure for the FHIR client module with proper imports and exports to handle AllergyIntolerance queries.",
+            "dependencies": [],
+            "details": "Create the file structure for the FHIR client module at src/js/fhir-client.js. Import necessary dependencies and set up the module exports. Define the basic structure of the getAllergyData function that will accept a client instance and patientId parameter. Ensure the module follows proper JavaScript module patterns for reusability across the application.",
+            "status": "done",
+            "testStrategy": "Verify the module can be properly imported in other parts of the application. Check that the function signature is correct and that it returns a Promise."
+          },
+          {
+            "id": 2,
+            "title": "Implement AllergyIntolerance Query Function",
+            "description": "Implement the core functionality to query AllergyIntolerance resources for a specific patient using the FHIR client.",
+            "dependencies": [
+              "17.1"
+            ],
+            "details": "Complete the getAllergyData function to query AllergyIntolerance resources. Use the client.request method with the appropriate FHIR search parameters. Include options for resolveReferences to automatically resolve patient and asserter references, set pageLimit to 0 for all results, and use flat:true to simplify the response structure. Return the retrieved allergies data.",
+            "status": "done",
+            "testStrategy": "Test the function with a known patient ID and verify it correctly retrieves AllergyIntolerance resources. Check the network requests to ensure the correct FHIR query URL is being used."
+          },
+          {
+            "id": 3,
+            "title": "Implement Error Handling and Logging",
+            "description": "Add comprehensive error handling and logging to the FHIR client to capture and report any issues during data retrieval.",
+            "dependencies": [
+              "17.2"
+            ],
+            "details": "Enhance the try/catch block in the getAllergyData function to handle different types of errors (network errors, authentication issues, server errors). Implement detailed logging that captures the error type, message, and context. Create specific error messages for common failure scenarios. Return appropriate error objects that can be handled by the calling code.",
+            "status": "done",
+            "testStrategy": "Test error handling by simulating various error conditions such as network disconnection, invalid patient IDs, and server errors. Verify that errors are properly caught, logged, and returned with meaningful messages."
+          },
+          {
+            "id": 4,
+            "title": "Implement Pagination Handling",
+            "description": "Add support for handling paginated responses when retrieving large sets of AllergyIntolerance resources.",
+            "dependencies": [
+              "17.2"
+            ],
+            "details": "Enhance the getAllergyData function to handle paginated responses from the FHIR server. Check if the response includes a 'link' property with a 'next' relation, indicating more pages are available. Implement a recursive or iterative approach to fetch all pages and combine the results. Consider adding a parameter to limit the maximum number of pages retrieved to prevent excessive requests.",
+            "status": "done",
+            "testStrategy": "Test with a patient that has many allergies to verify pagination works correctly. Ensure all pages are retrieved and combined into a single result set. Verify that the function handles the case where there are no additional pages."
+          },
+          {
+            "id": 5,
+            "title": "Handle Empty Results and Response Validation",
+            "description": "Implement handling for cases where no allergies are found and validate that the response conforms to FHIR R4 specifications.",
+            "dependencies": [
+              "17.3",
+              "17.4"
+            ],
+            "details": "Add logic to handle the case where no AllergyIntolerance resources are found for the patient. Return an empty array rather than null or undefined to ensure consistent return types. Implement validation of the response structure to confirm it follows FHIR R4 specifications. Check for required fields and proper resource types. Add a function to normalize the response data structure to ensure consistent formatting regardless of how the server returns the data.",
+            "status": "done",
+            "testStrategy": "Test with patients who have no allergies to verify proper handling of empty results. Test with various FHIR servers to ensure the client can handle slight variations in response formats while maintaining compliance with FHIR R4 specifications."
+          }
+        ]
+      },
+      {
+        "id": 18,
+        "title": "Create JSON Display Functionality",
+        "description": "Implement the functionality to display the retrieved AllergyIntolerance resources in structured JSON format on the page.",
+        "details": "1. Create a module for JSON display:\n   ```javascript\n   // src/js/json-display.js\n   const displayJsonData = (data, targetElementId) => {\n     const targetElement = document.getElementById(targetElementId);\n     if (!targetElement) {\n       console.error(`Target element ${targetElementId} not found`);\n       return;\n     }\n     \n     // Format JSON with indentation for readability\n     const formattedJson = JSON.stringify(data, null, 2);\n     \n     // Create pre element for formatted display\n     const preElement = document.createElement('pre');\n     preElement.className = 'json-display';\n     preElement.textContent = formattedJson;\n     \n     // Clear previous content and append new JSON\n     targetElement.innerHTML = '';\n     targetElement.appendChild(preElement);\n   };\n   ```\n2. Add CSS styling for JSON display:\n   ```css\n   /* src/css/styles.css */\n   .json-display {\n     background-color: #f5f5f5;\n     border: 1px solid #ddd;\n     border-radius: 4px;\n     padding: 10px;\n     overflow: auto;\n     font-family: monospace;\n     white-space: pre-wrap;\n   }\n   ```\n3. Integrate with the main application flow\n4. Add copy-to-clipboard functionality for convenience\n5. Ensure proper handling of empty or null data",
+        "testStrategy": "Test by launching the application and verifying that allergy data is correctly displayed in JSON format. Check that the formatting is readable and that all FHIR resource details are included. Verify that the display updates correctly when different data is loaded.",
+        "priority": "medium",
+        "dependencies": [
+          17
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement the JSON Display Module",
+            "description": "Create the core module for displaying JSON data with proper formatting and error handling",
+            "dependencies": [],
+            "details": "Create the src/js/json-display.js file with the displayJsonData function as specified in the task details. Ensure the function properly handles the case when the target element is not found. The function should format the JSON with proper indentation for readability and create a pre element with the appropriate class for displaying the formatted JSON.",
+            "status": "done",
+            "testStrategy": "Test the function with various JSON data structures and verify that it correctly displays the formatted JSON in the target element. Also test with non-existent target elements to ensure proper error handling."
+          },
+          {
+            "id": 2,
+            "title": "Add CSS Styling for JSON Display",
+            "description": "Create and implement the CSS styling for the JSON display to ensure readability and visual appeal",
+            "dependencies": [
+              "18.1"
+            ],
+            "details": "Add the .json-display CSS class to the src/css/styles.css file as specified in the task details. The styling should include background color, border, border-radius, padding, overflow handling, font family, and white-space properties to ensure the JSON is displayed in a readable format.",
+            "status": "done",
+            "testStrategy": "Verify that the JSON display has the correct styling by inspecting the rendered output in different browsers and screen sizes. Check that the overflow behavior works correctly for large JSON structures."
+          },
+          {
+            "id": 3,
+            "title": "Implement Copy-to-Clipboard Functionality",
+            "description": "Add a button and functionality to allow users to easily copy the displayed JSON data to their clipboard",
+            "dependencies": [
+              "18.1"
+            ],
+            "details": "Enhance the json-display.js module to include a copy-to-clipboard button. Add a function that creates a button element with appropriate styling, positions it near the JSON display, and attaches a click event handler that uses the Clipboard API (navigator.clipboard.writeText) to copy the JSON text. Include visual feedback when the copy action is successful.",
+            "status": "done",
+            "testStrategy": "Test the copy functionality by clicking the button and verifying that the JSON is correctly copied to the clipboard. Test in different browsers to ensure compatibility with the Clipboard API."
+          },
+          {
+            "id": 4,
+            "title": "Add Empty/Null Data Handling",
+            "description": "Implement proper handling for cases when the data to be displayed is empty, null, or undefined",
+            "dependencies": [
+              "18.1"
+            ],
+            "details": "Enhance the displayJsonData function to properly handle edge cases. Add checks for null, undefined, or empty data and display appropriate messages (e.g., \"No data available\") instead of empty JSON. Also handle cases where the data is not valid JSON or cannot be stringified properly.",
+            "status": "done",
+            "testStrategy": "Test the function with null, undefined, empty objects, empty arrays, and other edge cases to verify that it handles them gracefully and displays appropriate messages."
+          },
+          {
+            "id": 5,
+            "title": "Integrate JSON Display with Main Application Flow",
+            "description": "Connect the JSON display functionality with the main application to display AllergyIntolerance resources",
+            "dependencies": [
+              "18.1",
+              "18.2",
+              "18.3",
+              "18.4"
+            ],
+            "details": "Export the displayJsonData function and import it in the main application script. Add code to call this function when AllergyIntolerance resources are retrieved, passing the data and the ID of the target container element. Ensure the function is called at the appropriate point in the application flow, after the data has been fetched from the FHIR server. Update the main application to include a dedicated container element for the JSON display.",
+            "status": "done",
+            "testStrategy": "Test the integration by running the complete application flow, retrieving AllergyIntolerance resources, and verifying that they are correctly displayed in JSON format. Check that the display updates when new data is loaded."
+          }
+        ]
+      },
+      {
+        "id": 19,
+        "title": "Implement Error Handling and Messaging",
+        "description": "Create comprehensive error handling for various scenarios including no allergies found, network errors, authentication failures, and server issues.",
+        "details": "1. Create an error handling module:\n   ```javascript\n   // src/js/error-handler.js\n   const displayError = (message, targetElementId) => {\n     const targetElement = document.getElementById(targetElementId || 'error');\n     if (!targetElement) {\n       console.error(`Error display element ${targetElementId} not found`);\n       console.error(message);\n       return;\n     }\n     \n     targetElement.className = 'error-message';\n     targetElement.textContent = message;\n     targetElement.style.display = 'block';\n   };\n   \n   const handleNoAllergies = (targetElementId) => {\n     const targetElement = document.getElementById(targetElementId || 'content');\n     if (!targetElement) return;\n     \n     targetElement.innerHTML = '<div class=\"info-message\">No allergies found for this patient.</div>';\n   };\n   ```\n2. Add CSS for error messages:\n   ```css\n   /* src/css/styles.css */\n   .error-message {\n     color: #721c24;\n     background-color: #f8d7da;\n     border: 1px solid #f5c6cb;\n     border-radius: 4px;\n     padding: 10px;\n     margin: 10px 0;\n   }\n   \n   .info-message {\n     color: #0c5460;\n     background-color: #d1ecf1;\n     border: 1px solid #bee5eb;\n     border-radius: 4px;\n     padding: 10px;\n     margin: 10px 0;\n   }\n   ```\n3. Implement specific error handling for common scenarios:\n   - Authentication failures\n   - Network connectivity issues\n   - FHIR server errors\n   - No allergies found\n   - Invalid patient context\n4. Add retry logic for transient errors\n5. Provide clear user guidance in error messages",
+        "testStrategy": "Test error handling by simulating various error conditions: disconnect network to test connectivity errors, modify patient ID to test 'no allergies found' scenario, and use invalid credentials to test authentication failures. Verify that appropriate error messages are displayed in each case.",
+        "priority": "medium",
+        "dependencies": [
+          17,
+          18
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Network Error Handling",
+            "description": "Create functionality to detect and handle network connectivity issues when making API calls to the FHIR server.",
+            "dependencies": [],
+            "details": "Extend the error-handler.js module to include a specific function for network errors. Implement a checkNetworkStatus function that verifies connectivity before making API calls. Add a handleNetworkError function that displays appropriate messages and provides retry options. Use the fetch API's timeout and catch mechanisms to detect network failures. Include offline detection using navigator.onLine property.",
+            "status": "done",
+            "testStrategy": "Test by disabling network connectivity and attempting to fetch patient data. Verify that the appropriate error message is displayed and that the retry mechanism works when connectivity is restored."
+          },
+          {
+            "id": 2,
+            "title": "Implement Authentication Error Handling",
+            "description": "Create handlers for authentication-related errors including expired tokens, invalid credentials, and authorization failures.",
+            "dependencies": [
+              "19.1"
+            ],
+            "details": "Add handleAuthError function to error-handler.js that processes authentication errors from the FHIR client. Implement token expiration detection and automatic refresh attempts. Create clear user messaging for authentication failures with guidance on how to resolve (e.g., re-login instructions). Add specific error codes and messages for different auth scenarios (401, 403 responses). Integrate with the existing OAuth2 flow to handle authentication edge cases.",
+            "status": "done",
+            "testStrategy": "Test by manipulating authentication tokens to be invalid or expired. Verify appropriate error messages are displayed and that the application attempts token refresh when appropriate."
+          },
+          {
+            "id": 3,
+            "title": "Implement FHIR Server Error Handling",
+            "description": "Create handlers for FHIR server-specific errors including resource not found, server errors, and invalid requests.",
+            "dependencies": [
+              "19.1"
+            ],
+            "details": "Add handleFhirServerError function to error-handler.js that processes different HTTP status codes from the FHIR server (404, 500, etc.). Implement specific error messages for common FHIR error scenarios. Create a function to parse and display OperationOutcome resources returned by the FHIR server. Add retry logic with exponential backoff for 5xx errors. Include detailed logging of server errors for troubleshooting.",
+            "status": "done",
+            "testStrategy": "Test by triggering various server errors through invalid resource requests. Verify that appropriate error messages are displayed and that the retry logic works for applicable error types."
+          },
+          {
+            "id": 4,
+            "title": "Implement Data-Specific Error Handling",
+            "description": "Create handlers for data-specific scenarios such as no allergies found, empty patient records, or malformed data responses.",
+            "dependencies": [
+              "19.1",
+              "19.3"
+            ],
+            "details": "Enhance the handleNoAllergies function to provide more user-friendly messaging. Add functions for other empty data scenarios (medications, conditions, etc.). Implement data validation to detect malformed or unexpected response formats. Create appropriate UI components for displaying different types of data-related messages. Add guidance text to help users understand what empty data means in clinical context.",
+            "status": "done",
+            "testStrategy": "Test with patient records known to have no allergies or other specific data. Verify that appropriate informational messages are displayed rather than errors, and that the UI remains usable."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Error Handling Throughout Application",
+            "description": "Integrate all error handling components throughout the application and implement global error catching.",
+            "dependencies": [
+              "19.1",
+              "19.2",
+              "19.3",
+              "19.4"
+            ],
+            "details": "Add a global error handler using window.onerror and unhandledrejection event listeners. Implement try/catch blocks in all async functions throughout the application. Create an ErrorBoundary component or pattern to catch and display UI rendering errors. Add error logging functionality that captures error details for troubleshooting. Implement a consistent error display pattern across all application components. Update the main application code to use the appropriate error handlers based on the context and error type.",
+            "status": "done",
+            "testStrategy": "Perform end-to-end testing of the application, deliberately triggering various error conditions to ensure they are properly caught and displayed. Verify that the application remains stable and provides helpful guidance when errors occur."
+          }
+        ]
+      },
+      {
+        "id": 20,
+        "title": "Create Main Application Entry Point",
+        "description": "Develop the main index.html page and application initialization script that orchestrates the entire application flow.",
+        "details": "1. Create the main index.html file:\n   ```html\n   <!-- src/index.html -->\n   <!DOCTYPE html>\n   <html lang=\"en\">\n   <head>\n     <meta charset=\"UTF-8\">\n     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n     <title>GigaTECH SMART on FHIR Allergy Display</title>\n     <link rel=\"stylesheet\" href=\"./css/styles.css\">\n     <script src=\"./node_modules/fhirclient/build/fhirclient.js\"></script>\n   </head>\n   <body>\n     <div class=\"container\">\n       <h1>Patient Allergy Information</h1>\n       <div id=\"patient-info\"></div>\n       <div id=\"error\" style=\"display: none;\"></div>\n       <div id=\"loading\">Loading patient data...</div>\n       <div id=\"content\"></div>\n     </div>\n     \n     <script src=\"./js/auth.js\"></script>\n     <script src=\"./js/patient-context.js\"></script>\n     <script src=\"./js/fhir-client.js\"></script>\n     <script src=\"./js/json-display.js\"></script>\n     <script src=\"./js/error-handler.js\"></script>\n     <script src=\"./js/app.js\"></script>\n   </body>\n   </html>\n   ```\n\n2. Create the main application script:\n   ```javascript\n   // src/js/app.js\n   document.addEventListener('DOMContentLoaded', async () => {\n     try {\n       // Complete authentication\n       const client = await handleAuth();\n       \n       // Get patient context\n       const patientContext = await getPatientContext(client);\n       document.getElementById('patient-info').textContent = \n         `Patient: ${patientContext.resource.name?.[0]?.given?.join(' ')} ${patientContext.resource.name?.[0]?.family}`;\n       \n       // Get allergy data\n       const allergies = await getAllergyData(client, patientContext.id);\n       \n       // Hide loading indicator\n       document.getElementById('loading').style.display = 'none';\n       \n       // Handle no allergies case\n       if (!allergies || allergies.total === 0 || allergies.entry?.length === 0) {\n         handleNoAllergies('content');\n         return;\n       }\n       \n       // Display allergy data as JSON\n       displayJsonData(allergies, 'content');\n       \n     } catch (error) {\n       document.getElementById('loading').style.display = 'none';\n       displayError(`Error: ${error.message}`, 'error');\n     }\n   });\n   ```\n3. Add basic CSS styling for the application:\n   ```css\n   /* src/css/styles.css */\n   body {\n     font-family: Arial, sans-serif;\n     line-height: 1.6;\n     margin: 0;\n     padding: 20px;\n     color: #333;\n   }\n   \n   .container {\n     max-width: 1000px;\n     margin: 0 auto;\n   }\n   \n   h1 {\n     color: #2c3e50;\n   }\n   \n   #patient-info {\n     font-weight: bold;\n     margin-bottom: 20px;\n   }\n   \n   #loading {\n     margin: 20px 0;\n     font-style: italic;\n   }\n   ```\n4. Ensure all modules are properly imported and initialized\n5. Add responsive design elements for various screen sizes",
+        "testStrategy": "Test the complete application flow by launching with the provided URL and verifying that all components work together correctly. Check that patient information is displayed, allergies are retrieved and shown in JSON format, and the UI is responsive and user-friendly.",
+        "priority": "high",
+        "dependencies": [
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create and structure the index.html file",
+            "description": "Create the main index.html file with proper HTML structure, meta tags, title, and references to CSS and JavaScript files.",
+            "dependencies": [],
+            "details": "Create the index.html file in the src directory with the following structure: DOCTYPE declaration, html tag with lang attribute, head section with meta tags for charset and viewport, title tag, link to CSS stylesheet, and script tag for FHIR client. In the body, create container div with sections for patient info, error messages, loading indicator, and content display. Add script tags at the bottom of the body to load all required JavaScript modules in the correct order.",
+            "status": "done",
+            "testStrategy": "Validate HTML structure using W3C validator. Verify all script and CSS references are correct and load without errors in the browser console."
+          },
+          {
+            "id": 2,
+            "title": "Implement the main application script (app.js)",
+            "description": "Create the main application script that orchestrates the application flow, including authentication, patient context retrieval, and allergy data fetching.",
+            "dependencies": [
+              "20.1"
+            ],
+            "details": "Create app.js in the src/js directory. Implement a DOMContentLoaded event listener that handles the application initialization flow: 1) Call handleAuth() to authenticate with FHIR server, 2) Call getPatientContext() to retrieve patient information, 3) Display patient name in the patient-info element, 4) Call getAllergyData() to fetch allergy information, 5) Hide the loading indicator, 6) Handle the case when no allergies are found, 7) Display allergy data using displayJsonData(). Wrap everything in try/catch to handle errors appropriately.",
+            "status": "done",
+            "testStrategy": "Test the script by launching the application and verifying each step executes correctly. Check error handling by simulating network failures and API errors."
+          },
+          {
+            "id": 3,
+            "title": "Create basic CSS styling",
+            "description": "Implement the CSS styles for the application to ensure proper layout and visual presentation.",
+            "dependencies": [
+              "20.1"
+            ],
+            "details": "Create styles.css in the src/css directory. Define styles for body (font-family, line-height, margins, padding, text color), container (max-width, margins), headings (color), patient info section (font-weight, margins), and loading indicator (margins, font-style). Ensure the layout is clean and readable with appropriate spacing between elements.",
+            "status": "done",
+            "testStrategy": "Verify styles are applied correctly across different browsers. Check that the layout remains usable at various screen sizes."
+          },
+          {
+            "id": 4,
+            "title": "Implement responsive design",
+            "description": "Enhance the CSS with responsive design elements to ensure the application works well on various screen sizes.",
+            "dependencies": [
+              "20.3"
+            ],
+            "details": "Add media queries to styles.css to handle different screen sizes. For small screens (max-width: 600px), adjust container padding, reduce font sizes, and modify margins for better mobile viewing. For medium screens (max-width: 900px), adjust layout proportions. Ensure content containers have max-width properties and use relative units (%, em, rem) instead of fixed pixel values where appropriate. Add responsive table styles for better display of data on small screens.",
+            "status": "done",
+            "testStrategy": "Test the application on various devices (desktop, tablet, mobile) and browsers. Use browser developer tools to simulate different screen sizes and verify the layout adjusts appropriately."
+          },
+          {
+            "id": 5,
+            "title": "Integrate and test all components",
+            "description": "Ensure all modules are properly imported, initialized, and work together correctly in the application flow.",
+            "dependencies": [
+              "20.2",
+              "20.3",
+              "20.4"
+            ],
+            "details": "Verify that all required JavaScript modules (auth.js, patient-context.js, fhir-client.js, json-display.js, error-handler.js) are correctly referenced in index.html and loaded in the proper order. Test the complete application flow to ensure each module is called at the appropriate time. Add console.log statements at key points in the application flow to aid debugging. Create a simple function to handle the case when no allergies are found (handleNoAllergies). Test error scenarios to ensure the error handler displays messages correctly.",
+            "status": "done",
+            "testStrategy": "Perform end-to-end testing of the application by launching it and verifying each step of the process works correctly. Test with both valid patient data and error scenarios. Verify that the application gracefully handles edge cases like missing data or network failures."
+          }
+        ]
+      },
+      {
+        "id": 21,
+        "title": "Implement Cross-Browser Compatibility and Testing",
+        "description": "Ensure the application works correctly across different browsers and implement comprehensive testing for all functionality.",
+        "details": "1. Add cross-browser compatibility features:\n   ```javascript\n   // src/js/browser-compatibility.js\n   const checkBrowserCompatibility = () => {\n     // Check for essential features\n     const features = {\n       fetch: typeof fetch !== 'undefined',\n       promises: typeof Promise !== 'undefined',\n       localStorage: typeof localStorage !== 'undefined',\n       sessionStorage: typeof sessionStorage !== 'undefined'\n     };\n     \n     const incompatibleFeatures = Object.entries(features)\n       .filter(([_, supported]) => !supported)\n       .map(([feature]) => feature);\n     \n     if (incompatibleFeatures.length > 0) {\n       console.warn('Browser compatibility issues detected:', incompatibleFeatures);\n       return false;\n     }\n     \n     return true;\n   };\n   ```\n2. Create a test script for validating key functionality:\n   ```javascript\n   // src/js/test.js\n   const runTests = async () => {\n     console.log('Running application tests...');\n     \n     // Test browser compatibility\n     const compatible = checkBrowserCompatibility();\n     console.log('Browser compatibility:', compatible ? 'PASS' : 'FAIL');\n     \n     // Test SMART launch sequence (manual verification required)\n     console.log('SMART launch test: Manual verification required');\n     \n     // Test FHIR client configuration\n     try {\n       const client = await FHIR.oauth2.ready();\n       console.log('FHIR client configuration: PASS');\n       \n       // Test patient context retrieval\n       try {\n         const patient = await client.patient.read();\n         console.log('Patient context retrieval: PASS', patient.id);\n       } catch (e) {\n         console.log('Patient context retrieval: FAIL', e);\n       }\n       \n       // Test allergy data retrieval\n       try {\n         const allergies = await client.request(`AllergyIntolerance?patient=${client.patient.id}`);\n         console.log('Allergy data retrieval: PASS', allergies);\n       } catch (e) {\n         console.log('Allergy data retrieval: FAIL', e);\n       }\n     } catch (e) {\n       console.log('FHIR client configuration: FAIL', e);\n     }\n     \n     console.log('Tests completed');\n   };\n   ```\n3. Add a test mode flag to the application\n4. Test in multiple browsers: Chrome, Firefox, Safari, Edge\n5. Create documentation of test results and browser compatibility\n6. Implement feature detection and fallbacks where necessary",
+        "testStrategy": "Test the application in multiple browsers (Chrome, Firefox, Safari, Edge) to verify cross-browser compatibility. Run the test script to validate key functionality. Test with the specified provider (Dr. Albertine Orn) and patient (Ms. Mariana Acuna) to ensure correct data retrieval and display.",
+        "priority": "medium",
+        "dependencies": [
+          20
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Enhance Browser Compatibility Detection Module",
+            "description": "Expand the browser compatibility detection module to check for additional features and implement polyfills for critical functionality.",
+            "dependencies": [],
+            "details": "1. Enhance the existing checkBrowserCompatibility function to check for more browser features:\n- CSS Grid support\n- Flexbox support\n- ES6 features (arrow functions, template literals, etc.)\n- Web Storage API\n- Fetch API with AbortController\n\n2. Add a function to load polyfills when needed:\n```javascript\nconst loadPolyfills = async (incompatibleFeatures) => {\n  if (incompatibleFeatures.includes('fetch')) {\n    await import('./polyfills/fetch-polyfill.js');\n  }\n  if (incompatibleFeatures.includes('promises')) {\n    await import('./polyfills/promise-polyfill.js');\n  }\n  // Add more polyfills as needed\n  return true;\n};\n```\n\n3. Create a main compatibility function that checks and resolves compatibility issues:\n```javascript\nconst ensureBrowserCompatibility = async () => {\n  const features = checkBrowserCompatibility();\n  const incompatibleFeatures = Object.entries(features)\n    .filter(([_, supported]) => !supported)\n    .map(([feature]) => feature);\n    \n  if (incompatibleFeatures.length > 0) {\n    console.warn('Loading polyfills for:', incompatibleFeatures);\n    await loadPolyfills(incompatibleFeatures);\n  }\n  \n  return true;\n};\n```",
+            "status": "done",
+            "testStrategy": "Test the compatibility module in multiple browsers (Chrome, Firefox, Safari, Edge) with different versions. Create a test page that displays compatibility results and loaded polyfills. Verify that appropriate polyfills are loaded when needed."
+          },
+          {
+            "id": 2,
+            "title": "Implement Comprehensive Test Suite",
+            "description": "Expand the test script to include comprehensive testing for all application functionality, including UI components, data processing, and error handling.",
+            "dependencies": [],
+            "details": "1. Create a structured test suite with categories:\n```javascript\nconst testSuite = {\n  compatibility: {\n    browserFeatures: async () => {\n      const compatible = await ensureBrowserCompatibility();\n      return { pass: compatible, message: compatible ? 'Browser compatibility check passed' : 'Browser compatibility issues detected' };\n    }\n  },\n  authentication: {\n    smartLaunch: async () => {\n      try {\n        const client = await FHIR.oauth2.ready();\n        return { pass: true, message: 'SMART launch successful', data: client };\n      } catch (e) {\n        return { pass: false, message: 'SMART launch failed', error: e };\n      }\n    }\n  },\n  dataRetrieval: {\n    patientContext: async (client) => {\n      try {\n        const patient = await client.patient.read();\n        return { pass: !!patient.id, message: 'Patient context retrieved', data: patient };\n      } catch (e) {\n        return { pass: false, message: 'Failed to retrieve patient context', error: e };\n      }\n    },\n    allergies: async (client) => {\n      try {\n        const allergies = await client.request(`AllergyIntolerance?patient=${client.patient.id}`);\n        return { pass: true, message: 'Allergy data retrieved', data: allergies };\n      } catch (e) {\n        return { pass: false, message: 'Failed to retrieve allergy data', error: e };\n      }\n    }\n  },\n  ui: {\n    rendering: () => {\n      const allergyList = document.getElementById('allergy-list');\n      return { pass: !!allergyList, message: allergyList ? 'UI elements rendered correctly' : 'UI elements not found' };\n    }\n  },\n  errorHandling: {\n    networkError: async () => {\n      // Simulate network error\n      const originalFetch = window.fetch;\n      window.fetch = () => Promise.reject(new Error('Network error'));\n      \n      try {\n        await testErrorHandling('Network error');\n        window.fetch = originalFetch;\n        return { pass: true, message: 'Network error handled correctly' };\n      } catch (e) {\n        window.fetch = originalFetch;\n        return { pass: false, message: 'Network error not handled correctly', error: e };\n      }\n    }\n  }\n};\n```\n\n2. Create a test runner function:\n```javascript\nconst runTests = async () => {\n  console.log('Running application tests...');\n  const results = {};\n  \n  // Run compatibility tests\n  results.compatibility = {};\n  for (const [name, test] of Object.entries(testSuite.compatibility)) {\n    results.compatibility[name] = await test();\n  }\n  \n  // Run authentication tests\n  results.authentication = {};\n  for (const [name, test] of Object.entries(testSuite.authentication)) {\n    results.authentication[name] = await test();\n  }\n  \n  // Get client from authentication test\n  const client = results.authentication.smartLaunch.pass ? \n    results.authentication.smartLaunch.data : null;\n  \n  if (client) {\n    // Run data retrieval tests\n    results.dataRetrieval = {};\n    for (const [name, test] of Object.entries(testSuite.dataRetrieval)) {\n      results.dataRetrieval[name] = await test(client);\n    }\n  }\n  \n  // Run UI tests\n  results.ui = {};\n  for (const [name, test] of Object.entries(testSuite.ui)) {\n    results.ui[name] = test();\n  }\n  \n  // Run error handling tests\n  results.errorHandling = {};\n  for (const [name, test] of Object.entries(testSuite.errorHandling)) {\n    results.errorHandling[name] = await test();\n  }\n  \n  console.log('Tests completed', results);\n  return results;\n};\n```",
+            "status": "done",
+            "testStrategy": "Execute the test suite in each target browser. Create a visual test report that displays pass/fail status for each test category. Test with both valid and invalid data scenarios to ensure error handling is properly tested."
+          },
+          {
+            "id": 3,
+            "title": "Implement Test Mode and UI for Testing",
+            "description": "Add a test mode flag to the application and create a UI for running tests and displaying results.",
+            "dependencies": [
+              "21.2"
+            ],
+            "details": "1. Add a test mode parameter to the application:\n```javascript\n// src/js/app.js\nconst isTestMode = () => {\n  const urlParams = new URLSearchParams(window.location.search);\n  return urlParams.has('test') || localStorage.getItem('testMode') === 'true';\n};\n\n// Initialize test mode if needed\nconst initTestMode = () => {\n  if (isTestMode()) {\n    console.log('Application running in test mode');\n    createTestUI();\n  }\n};\n```\n\n2. Create a test UI component:\n```javascript\nconst createTestUI = () => {\n  const testPanel = document.createElement('div');\n  testPanel.id = 'test-panel';\n  testPanel.className = 'test-panel';\n  \n  const header = document.createElement('h2');\n  header.textContent = 'Test Panel';\n  testPanel.appendChild(header);\n  \n  const runButton = document.createElement('button');\n  runButton.textContent = 'Run Tests';\n  runButton.onclick = async () => {\n    const resultsElement = document.getElementById('test-results');\n    resultsElement.innerHTML = '<p>Running tests...</p>';\n    const results = await runTests();\n    displayTestResults(results, resultsElement);\n  };\n  testPanel.appendChild(runButton);\n  \n  const resultsElement = document.createElement('div');\n  resultsElement.id = 'test-results';\n  testPanel.appendChild(resultsElement);\n  \n  document.body.appendChild(testPanel);\n};\n\n// Function to display test results in the UI\nconst displayTestResults = (results, container) => {\n  container.innerHTML = '';\n  \n  const createResultElement = (name, result) => {\n    const element = document.createElement('div');\n    element.className = `test-result ${result.pass ? 'pass' : 'fail'}`;\n    element.innerHTML = `\n      <h4>${name}</h4>\n      <p>${result.message}</p>\n      ${result.error ? `<pre>${result.error.toString()}</pre>` : ''}\n    `;\n    return element;\n  };\n  \n  for (const [category, tests] of Object.entries(results)) {\n    const categoryElement = document.createElement('div');\n    categoryElement.className = 'test-category';\n    \n    const categoryHeader = document.createElement('h3');\n    categoryHeader.textContent = category;\n    categoryElement.appendChild(categoryHeader);\n    \n    for (const [name, result] of Object.entries(tests)) {\n      categoryElement.appendChild(createResultElement(name, result));\n    }\n    \n    container.appendChild(categoryElement);\n  }\n};\n```\n\n3. Add CSS for the test UI:\n```css\n/* src/css/test.css */\n.test-panel {\n  position: fixed;\n  right: 0;\n  top: 0;\n  width: 400px;\n  height: 100%;\n  background: #f5f5f5;\n  border-left: 1px solid #ddd;\n  padding: 20px;\n  overflow-y: auto;\n  z-index: 1000;\n}\n\n.test-result {\n  margin: 10px 0;\n  padding: 10px;\n  border-radius: 4px;\n}\n\n.test-result.pass {\n  background: #e6ffe6;\n  border: 1px solid #99cc99;\n}\n\n.test-result.fail {\n  background: #ffe6e6;\n  border: 1px solid #cc9999;\n}\n\n.test-category {\n  margin-bottom: 20px;\n}\n```\n\n4. Update the main application to initialize test mode:\n```javascript\ndocument.addEventListener('DOMContentLoaded', () => {\n  // Initialize the application\n  initApp();\n  \n  // Initialize test mode if needed\n  initTestMode();\n});\n```",
+            "status": "done",
+            "testStrategy": "Test the test mode by appending ?test=true to the application URL. Verify that the test panel appears and that running tests displays accurate results. Test in all target browsers to ensure the test UI works consistently."
+          },
+          {
+            "id": 4,
+            "title": "Implement Browser-Specific Adaptations",
+            "description": "Create browser-specific adaptations and fallbacks for features that have inconsistent implementations across browsers.",
+            "dependencies": [
+              "21.1"
+            ],
+            "details": "1. Create a browser detection utility:\n```javascript\n// src/js/browser-detection.js\nconst detectBrowser = () => {\n  const userAgent = navigator.userAgent;\n  let browserName;\n  let browserVersion;\n  \n  // Detect Chrome\n  if (userAgent.match(/chrome|chromium|crios/i)) {\n    browserName = 'chrome';\n    const match = userAgent.match(/(?:chrome|chromium|crios)\\/([\\d.]+)/);\n    browserVersion = match ? match[1] : '';\n  }\n  // Detect Firefox\n  else if (userAgent.match(/firefox|fxios/i)) {\n    browserName = 'firefox';\n    const match = userAgent.match(/(?:firefox|fxios)\\/([\\d.]+)/);\n    browserVersion = match ? match[1] : '';\n  }\n  // Detect Safari\n  else if (userAgent.match(/safari/i) && !userAgent.match(/chrome|chromium|crios/i)) {\n    browserName = 'safari';\n    const match = userAgent.match(/version\\/([\\d.]+)/);\n    browserVersion = match ? match[1] : '';\n  }\n  // Detect Edge\n  else if (userAgent.match(/edg/i)) {\n    browserName = 'edge';\n    const match = userAgent.match(/edg\\/([\\d.]+)/);\n    browserVersion = match ? match[1] : '';\n  }\n  // Detect IE\n  else if (userAgent.match(/trident/i)) {\n    browserName = 'ie';\n    const match = userAgent.match(/(?:rv:)([\\d.]+)/);\n    browserVersion = match ? match[1] : '';\n  }\n  else {\n    browserName = 'unknown';\n    browserVersion = '';\n  }\n  \n  return { name: browserName, version: browserVersion };\n};\n```\n\n2. Implement browser-specific CSS:\n```css\n/* src/css/browser-specific.css */\n/* Safari-specific styles */\n@supports (-webkit-touch-callout: none) {\n  .allergy-card {\n    /* Safari-specific box shadow */\n    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n  }\n}\n\n/* Firefox-specific styles */\n@-moz-document url-prefix() {\n  .allergy-card {\n    /* Firefox-specific border */\n    border: 1px solid rgba(0, 0, 0, 0.1);\n  }\n}\n\n/* Edge-specific styles */\n@supports (-ms-ime-align:auto) {\n  .allergy-card {\n    /* Edge-specific margin */\n    margin: 12px 0;\n  }\n}\n```\n\n3. Create browser-specific JavaScript adaptations:\n```javascript\n// src/js/browser-adaptations.js\nconst applyBrowserAdaptations = () => {\n  const { name, version } = detectBrowser();\n  console.log(`Detected browser: ${name} ${version}`);\n  \n  // Add a class to the body for CSS targeting\n  document.body.classList.add(`browser-${name}`);\n  \n  // Safari-specific adaptations\n  if (name === 'safari') {\n    // Fix for Safari-specific date handling issues\n    window.formatDate = (dateString) => {\n      if (!dateString) return '';\n      const date = new Date(dateString);\n      // Safari needs special date formatting\n      return date.toLocaleDateString('en-US', { \n        year: 'numeric', \n        month: 'short', \n        day: 'numeric' \n      });\n    };\n  }\n  \n  // Firefox-specific adaptations\n  if (name === 'firefox') {\n    // Fix for Firefox-specific flexbox issues\n    const allergyList = document.getElementById('allergy-list');\n    if (allergyList) {\n      allergyList.style.display = 'block';\n      const cards = allergyList.querySelectorAll('.allergy-card');\n      cards.forEach(card => {\n        card.style.marginBottom = '10px';\n      });\n    }\n  }\n  \n  // IE and older Edge adaptations\n  if (name === 'ie' || (name === 'edge' && parseInt(version) < 79)) {\n    // Add warning for unsupported browsers\n    const warning = document.createElement('div');\n    warning.className = 'browser-warning';\n    warning.textContent = 'You are using an unsupported browser. Some features may not work correctly.';\n    document.body.insertBefore(warning, document.body.firstChild);\n  }\n};\n```\n\n4. Update the main application to apply browser adaptations:\n```javascript\ndocument.addEventListener('DOMContentLoaded', async () => {\n  // Ensure browser compatibility\n  await ensureBrowserCompatibility();\n  \n  // Apply browser-specific adaptations\n  applyBrowserAdaptations();\n  \n  // Initialize the application\n  initApp();\n});\n```",
+            "status": "done",
+            "testStrategy": "Test the application in each target browser (Chrome, Firefox, Safari, Edge) and verify that browser-specific adaptations are correctly applied. Check that the UI renders consistently across browsers and that browser-specific issues are properly addressed."
+          },
+          {
+            "id": 5,
+            "title": "Create Cross-Browser Testing Documentation",
+            "description": "Create comprehensive documentation of test results and browser compatibility, including screenshots and known issues for each browser.",
+            "dependencies": [
+              "21.2",
+              "21.3",
+              "21.4"
+            ],
+            "details": "1. Create a function to generate browser compatibility reports:\n```javascript\n// src/js/compatibility-report.js\nconst generateCompatibilityReport = async () => {\n  const { name: browser, version: browserVersion } = detectBrowser();\n  const testResults = await runTests();\n  \n  // Get system information\n  const os = navigator.platform || 'Unknown OS';\n  const viewport = `${window.innerWidth}x${window.innerHeight}`;\n  const devicePixelRatio = window.devicePixelRatio || 1;\n  \n  // Calculate overall test pass rate\n  let totalTests = 0;\n  let passedTests = 0;\n  \n  Object.values(testResults).forEach(category => {\n    Object.values(category).forEach(result => {\n      totalTests++;\n      if (result.pass) passedTests++;\n    });\n  });\n  \n  const passRate = totalTests > 0 ? (passedTests / totalTests * 100).toFixed(1) : 0;\n  \n  // Create report object\n  const report = {\n    timestamp: new Date().toISOString(),\n    browser,\n    browserVersion,\n    os,\n    viewport,\n    devicePixelRatio,\n    testResults,\n    summary: {\n      totalTests,\n      passedTests,\n      passRate: `${passRate}%`,\n      compatible: passRate > 80 // Consider compatible if pass rate > 80%\n    }\n  };\n  \n  return report;\n};\n\n// Function to display the report in the UI\nconst displayCompatibilityReport = (report, container) => {\n  container.innerHTML = '';\n  \n  // Create summary section\n  const summary = document.createElement('div');\n  summary.className = 'report-summary';\n  summary.innerHTML = `\n    <h3>Compatibility Report</h3>\n    <p><strong>Browser:</strong> ${report.browser} ${report.browserVersion}</p>\n    <p><strong>OS:</strong> ${report.os}</p>\n    <p><strong>Viewport:</strong> ${report.viewport} (${report.devicePixelRatio}x)</p>\n    <p><strong>Test Pass Rate:</strong> ${report.summary.passRate} (${report.summary.passedTests}/${report.summary.totalTests})</p>\n    <p><strong>Compatibility Status:</strong> <span class=\"${report.summary.compatible ? 'compatible' : 'incompatible'}\">\n      ${report.summary.compatible ? 'Compatible' : 'Issues Detected'}\n    </span></p>\n  `;\n  container.appendChild(summary);\n  \n  // Create detailed results section\n  const details = document.createElement('div');\n  details.className = 'report-details';\n  \n  for (const [category, tests] of Object.entries(report.testResults)) {\n    const categoryElement = document.createElement('div');\n    categoryElement.className = 'report-category';\n    \n    const categoryHeader = document.createElement('h4');\n    categoryHeader.textContent = category;\n    categoryElement.appendChild(categoryHeader);\n    \n    for (const [name, result] of Object.entries(tests)) {\n      const testElement = document.createElement('div');\n      testElement.className = `report-test ${result.pass ? 'pass' : 'fail'}`;\n      testElement.innerHTML = `\n        <p><strong>${name}:</strong> ${result.message}</p>\n        ${result.error ? `<pre>${result.error.toString()}</pre>` : ''}\n      `;\n      categoryElement.appendChild(testElement);\n    }\n    \n    details.appendChild(categoryElement);\n  }\n  \n  container.appendChild(details);\n  \n  // Add export button\n  const exportButton = document.createElement('button');\n  exportButton.textContent = 'Export Report';\n  exportButton.onclick = () => {\n    const reportJson = JSON.stringify(report, null, 2);\n    const blob = new Blob([reportJson], { type: 'application/json' });\n    const url = URL.createObjectURL(blob);\n    \n    const a = document.createElement('a');\n    a.href = url;\n    a.download = `compatibility-report-${report.browser}-${report.browserVersion}.json`;\n    a.click();\n    \n    URL.revokeObjectURL(url);\n  };\n  container.appendChild(exportButton);\n};\n```\n\n2. Add a report generation button to the test UI:\n```javascript\nconst createTestUI = () => {\n  // ... existing code ...\n  \n  const reportButton = document.createElement('button');\n  reportButton.textContent = 'Generate Compatibility Report';\n  reportButton.onclick = async () => {\n    const resultsElement = document.getElementById('test-results');\n    resultsElement.innerHTML = '<p>Generating compatibility report...</p>';\n    const report = await generateCompatibilityReport();\n    displayCompatibilityReport(report, resultsElement);\n  };\n  testPanel.appendChild(reportButton);\n  \n  // ... existing code ...\n};\n```\n\n3. Add CSS for the compatibility report:\n```css\n/* src/css/compatibility-report.css */\n.report-summary {\n  background: #f8f8f8;\n  padding: 15px;\n  border-radius: 4px;\n  margin-bottom: 20px;\n}\n\n.report-summary .compatible {\n  color: green;\n  font-weight: bold;\n}\n\n.report-summary .incompatible {\n  color: red;\n  font-weight: bold;\n}\n\n.report-category {\n  margin-bottom: 15px;\n}\n\n.report-test {\n  padding: 8px;\n  margin: 5px 0;\n  border-radius: 4px;\n}\n\n.report-test.pass {\n  background: #e6ffe6;\n}\n\n.report-test.fail {\n  background: #ffe6e6;\n}\n```\n\n4. Create a documentation template for manual testing:\n```html\n<!-- docs/browser-compatibility.md -->\n# Browser Compatibility Documentation\n\n## Test Environment\n\n| Browser | Version | OS | Date Tested | Tester |\n|---------|---------|----|--------------|---------|\n| Chrome  | [version] | [OS] | [date] | [name] |\n| Firefox | [version] | [OS] | [date] | [name] |\n| Safari  | [version] | [OS] | [date] | [name] |\n| Edge    | [version] | [OS] | [date] | [name] |\n\n## Test Results Summary\n\n| Browser | Pass Rate | Status | Known Issues |\n|---------|-----------|--------|---------------|\n| Chrome  | [rate] | [Compatible/Issues] | [list issues] |\n| Firefox | [rate] | [Compatible/Issues] | [list issues] |\n| Safari  | [rate] | [Compatible/Issues] | [list issues] |\n| Edge    | [rate] | [Compatible/Issues] | [list issues] |\n\n## Screenshots\n\n### Chrome\n[Insert screenshot]\n\n### Firefox\n[Insert screenshot]\n\n### Safari\n[Insert screenshot]\n\n### Edge\n[Insert screenshot]\n\n## Known Issues and Workarounds\n\n### Issue 1: [Description]\n**Affected Browsers:** [list]\n**Workaround:** [description]\n\n### Issue 2: [Description]\n**Affected Browsers:** [list]\n**Workaround:** [description]\n```",
+            "status": "done",
+            "testStrategy": "Generate compatibility reports for each target browser and compile them into a comprehensive documentation. Include screenshots of the application in each browser. Document any browser-specific issues and the implemented workarounds."
+          }
+        ]
+      },
+      {
+        "id": 22,
+        "title": "Create Documentation and Deployment Instructions",
+        "description": "Develop comprehensive documentation including setup instructions, usage guide, and known limitations.",
+        "details": "1. Create a README.md file with the following sections:\n   ```markdown\n   # GigaTECH SMART on FHIR Allergy Display Application\n   \n   ## Overview\n   This browser-based JavaScript application integrates with Electronic Health Record (EHR) systems using the SMART on FHIR framework to display patient allergy information.\n   \n   ## Setup Instructions\n   \n   ### Prerequisites\n   - Node.js (v14 or higher)\n   - npm (v6 or higher)\n   \n   ### Installation\n   1. Clone this repository\n   2. Install dependencies: `npm install`\n   3. Start the development server: `npm run serve`\n   \n   ### Testing\n   The application will be available at http://127.0.0.1:8080/\n   \n   To test with the SMART on FHIR sandbox, use the following launch URL:\n   http://127.0.0.1:8080/launch.html?launch=eyJhIjoiMSJ9&iss=https%3A%2F%2Flaunch.smarthealthit.org%2Fv%2Fr4%2Ffhir\n   \n   ## Usage Guide\n   1. Access the launch URL from within an EHR or using the test URL above\n   2. The application will handle the SMART launch sequence automatically\n   3. Authenticate with your EHR credentials when prompted\n   4. The application will display the patient's allergy information in JSON format\n   \n   ## Technical Details\n   - FHIR Version: R4\n   - Authentication: SMART on FHIR OAuth2\n   - Data Retrieval: AllergyIntolerance resources\n   \n   ## Known Limitations\n   - Displays raw JSON data rather than a formatted human-readable view\n   - Limited error recovery for certain edge cases\n   - No offline mode support\n   \n   ## License\n   [Specify license information]\n   ```\n\n2. Create a CONTRIBUTING.md file with development guidelines\n3. Add inline code documentation with JSDoc comments\n4. Create a simple user guide with screenshots\n5. Document testing procedures and results\n6. Include troubleshooting section for common issues",
+        "testStrategy": "Review documentation for accuracy and completeness. Verify that setup instructions work correctly by following them on a clean system. Check that all features and limitations are properly documented.",
+        "priority": "low",
+        "dependencies": [
+          21
+        ],
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create README.md with Project Documentation",
+            "description": "Develop a comprehensive README.md file that includes project overview, setup instructions, usage guide, technical details, and known limitations.",
+            "dependencies": [],
+            "details": "Create a README.md file in the project root with the following sections:\n- Project title and brief description\n- Overview of the SMART on FHIR Allergy Display Application\n- Setup instructions including prerequisites, installation steps, and testing URLs\n- Usage guide with step-by-step instructions\n- Technical details about FHIR version, authentication, and data retrieval\n- Known limitations section\n- License information\n\nEnsure all sections are properly formatted with Markdown syntax including headers, lists, and code blocks where appropriate.",
+            "status": "done",
+            "testStrategy": "Review the README.md file for accuracy, completeness, and proper Markdown formatting. Verify all links work correctly and that setup instructions can be followed successfully on a clean system."
+          },
+          {
+            "id": 2,
+            "title": "Create CONTRIBUTING.md with Development Guidelines",
+            "description": "Develop a CONTRIBUTING.md file that outlines development standards, code review process, and contribution workflow for the project.",
+            "dependencies": [],
+            "details": "Create a CONTRIBUTING.md file in the project root with the following sections:\n- Introduction to the contribution process\n- Development environment setup\n- Coding standards and style guidelines\n- Git workflow (branching strategy, commit message format)\n- Pull request process and review criteria\n- Testing requirements for contributions\n- Documentation requirements\n- Contact information for project maintainers\n\nInclude examples of good commit messages and PR descriptions to guide contributors.",
+            "status": "in-progress",
+            "testStrategy": "Review the CONTRIBUTING.md file for clarity and completeness. Ensure it provides sufficient guidance for new contributors and aligns with the project's development practices."
+          },
+          {
+            "id": 3,
+            "title": "Add JSDoc Comments to Code",
+            "description": "Add comprehensive inline documentation using JSDoc comments to all JavaScript modules and functions in the codebase.",
+            "dependencies": [],
+            "details": "For each JavaScript file in the project:\n1. Add file-level JSDoc comments describing the module's purpose\n2. Document each function/method with JSDoc comments including:\n   - Function description\n   - @param annotations for all parameters with types and descriptions\n   - @returns annotation describing return values\n   - @throws annotation for any exceptions that might be thrown\n   - @example sections where appropriate\n3. Document classes, constants, and other code elements\n4. Add TODO comments for any incomplete features\n\nEnsure comments follow JSDoc syntax for proper documentation generation.",
+            "status": "pending",
+            "testStrategy": "Verify that all JavaScript files have appropriate JSDoc comments. Run a documentation generator tool to ensure comments are properly formatted and generate readable documentation."
+          },
+          {
+            "id": 4,
+            "title": "Create User Guide with Screenshots",
+            "description": "Develop a comprehensive user guide with screenshots demonstrating the application workflow and features.",
+            "dependencies": [
+              "22.1"
+            ],
+            "details": "Create a user guide document (user-guide.md) with the following content:\n1. Introduction to the application\n2. Step-by-step walkthrough of the application with screenshots:\n   - Launch process from an EHR\n   - Authentication flow\n   - Main application interface\n   - Viewing allergy information\n   - Interpreting the displayed data\n3. Explanation of all UI elements and their functions\n4. Common use cases and workflows\n5. Tips for effective use\n\nCapture clear screenshots of each step in the application workflow, annotating them as needed to highlight important elements.",
+            "status": "pending",
+            "testStrategy": "Review the user guide for clarity, accuracy, and completeness. Have a non-technical user follow the guide to verify it provides sufficient guidance for using the application."
+          },
+          {
+            "id": 5,
+            "title": "Create Troubleshooting and Testing Documentation",
+            "description": "Develop documentation for testing procedures, expected results, and a troubleshooting guide for common issues.",
+            "dependencies": [
+              "22.1",
+              "22.4"
+            ],
+            "details": "Create two documentation files:\n\n1. testing.md:\n   - Test environment setup instructions\n   - Unit testing procedures and commands\n   - Integration testing procedures\n   - End-to-end testing scenarios\n   - Expected test results and validation criteria\n   - Test coverage requirements\n\n2. troubleshooting.md:\n   - Common error messages and their meanings\n   - Network connectivity issues and solutions\n   - Authentication problems and resolutions\n   - Data display issues and fixes\n   - Browser compatibility issues\n   - Environment-specific problems\n   - Contact information for support\n\nInclude specific error codes, screenshots of error states, and step-by-step resolution procedures.",
+            "status": "pending",
+            "testStrategy": "Verify the troubleshooting guide by simulating common error conditions and confirming the documented solutions resolve the issues. Test the testing documentation by having a developer follow the procedures to ensure they are clear and accurate."
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-24T16:46:12.928Z",
+      "updated": "2025-07-25T15:15:54.938Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

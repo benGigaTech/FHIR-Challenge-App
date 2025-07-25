@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Compatibility Report - SMART on FHIR Allergy App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.5;
+            color: #212529;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        header {
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        h1 {
+            color: #2c3e50;
+        }
+        
+        .report-summary {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .report-summary .compatible {
+            color: green;
+            font-weight: bold;
+        }
+        
+        .report-summary .incompatible {
+            color: red;
+            font-weight: bold;
+        }
+        
+        .report-category {
+            margin-bottom: 15px;
+        }
+        
+        .report-test {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        
+        .report-test.pass {
+            background: #e6ffe6;
+        }
+        
+        .report-test.fail {
+            background: #ffe6e6;
+        }
+        
+        .report-test.error {
+            background: #f8d7da;
+        }
+        
+        .report-test.skip {
+            background: #e2e3e5;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .status-pass {
+            color: green;
+        }
+        
+        .status-fail {
+            color: red;
+        }
+        
+        .status-error {
+            color: #dc3545;
+        }
+        
+        .status-skip {
+            color: #6c757d;
+        }
+        
+        .browser-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .screenshot {
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+        }
+        
+        .screenshot img {
+            max-width: 100%;
+        }
+        
+        footer {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #dee2e6;
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Browser Compatibility Report</h1>
+            <p>SMART on FHIR Allergy Display Application</p>
+            <p id="report-date">Generated: <span id="timestamp">Loading...</span></p>
+        </header>
+        
+        <div class="report-summary">
+            <h2>Summary</h2>
+            <p>This browser is <span id="compatibility-status">checking...</span> with the application.</p>
+            <p id="summary-details"></p>
+        </div>
+        
+        <div class="browser-info">
+            <h2>Browser Information</h2>
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>User Agent</td>
+                    <td id="user-agent">Loading...</td>
+                </tr>
+                <tr>
+                    <td>Browser</td>
+                    <td id="browser-name">Loading...</td>
+                </tr>
+                <tr>
+                    <td>Platform</td>
+                    <td id="platform">Loading...</td>
+                </tr>
+            </table>
+        </div>
+        
+        <h2>Feature Compatibility</h2>
+        <div id="feature-tests">
+            <p>Running compatibility tests...</p>
+        </div>
+        
+        <h2>Functional Tests</h2>
+        <div id="functional-tests">
+            <p>Running functional tests...</p>
+        </div>
+        
+        <div class="screenshot">
+            <h2>Application Screenshot</h2>
+            <p>Screenshot will be captured after tests complete.</p>
+            <div id="screenshot-placeholder"></div>
+        </div>
+        
+        <footer>
+            <p>This report is generated automatically by the SMART on FHIR Allergy Display Application.</p>
+            <p>For issues or questions, please refer to the project documentation.</p>
+        </footer>
+    </div>
+    
+    <script type="module">
+        import { checkBrowserCompatibility } from './js/browser-compatibility.js?v=1';
+        import { runTests, generateTestReport } from './js/test.js?v=1';
+        
+        // Set timestamp
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+        
+        // Detect browser
+        function detectBrowser() {
+            const userAgent = navigator.userAgent;
+            document.getElementById('user-agent').textContent = userAgent;
+            document.getElementById('platform').textContent = navigator.platform;
+            
+            let browserName = 'Unknown';
+            
+            if (userAgent.indexOf('Firefox') > -1) {
+                browserName = 'Mozilla Firefox';
+            } else if (userAgent.indexOf('SamsungBrowser') > -1) {
+                browserName = 'Samsung Internet';
+            } else if (userAgent.indexOf('Opera') > -1 || userAgent.indexOf('OPR') > -1) {
+                browserName = 'Opera';
+            } else if (userAgent.indexOf('Trident') > -1) {
+                browserName = 'Internet Explorer';
+            } else if (userAgent.indexOf('Edge') > -1) {
+                browserName = 'Microsoft Edge (Legacy)';
+            } else if (userAgent.indexOf('Edg') > -1) {
+                browserName = 'Microsoft Edge (Chromium)';
+            } else if (userAgent.indexOf('Chrome') > -1) {
+                browserName = 'Google Chrome';
+            } else if (userAgent.indexOf('Safari') > -1) {
+                browserName = 'Apple Safari';
+            }
+            
+            document.getElementById('browser-name').textContent = browserName;
+            return browserName;
+        }
+        
+        // Run feature compatibility tests
+        function runFeatureTests() {
+            const compatibility = checkBrowserCompatibility();
+            const featureTestsElement = document.getElementById('feature-tests');
+            featureTestsElement.innerHTML = '';
+            
+            // Update summary
+            const compatibilityStatus = document.getElementById('compatibility-status');
+            if (compatibility.isCompatible) {
+                compatibilityStatus.textContent = 'compatible';
+                compatibilityStatus.className = 'compatible';
+                document.getElementById('summary-details').textContent = 'All required features are supported by this browser.';
+            } else {
+                compatibilityStatus.textContent = 'not fully compatible';
+                compatibilityStatus.className = 'incompatible';
+                
+                let summaryDetails = 'The following features are not supported: ';
+                const allIncompatible = [
+                    ...compatibility.incompatibleFeatures.core,
+                    ...compatibility.incompatibleFeatures.fhir
+                ];
+                
+                summaryDetails += allIncompatible.join(', ');
+                document.getElementById('summary-details').textContent = summaryDetails;
+            }
+            
+            // Create core features table
+            const coreTable = document.createElement('table');
+            coreTable.innerHTML = `
+                <tr>
+                    <th>Core Feature</th>
+                    <th>Status</th>
+                </tr>
+            `;
+            
+            for (const [feature, supported] of Object.entries(compatibility.features.core)) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${feature}</td>
+                    <td class="${supported ? 'status-pass' : 'status-fail'}">
+                        ${supported ? 'Supported' : 'Not Supported'}
+                    </td>
+                `;
+                coreTable.appendChild(row);
+            }
+            
+            // Create FHIR features table
+            const fhirTable = document.createElement('table');
+            fhirTable.innerHTML = `
+                <tr>
+                    <th>FHIR Feature</th>
+                    <th>Status</th>
+                </tr>
+            `;
+            
+            for (const [feature, supported] of Object.entries(compatibility.features.fhir)) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${feature}</td>
+                    <td class="${supported ? 'status-pass' : 'status-fail'}">
+                        ${supported ? 'Supported' : 'Not Supported'}
+                    </td>
+                `;
+                fhirTable.appendChild(row);
+            }
+            
+            // Add tables to feature tests section
+            const coreSection = document.createElement('div');
+            coreSection.className = 'report-category';
+            coreSection.innerHTML = '<h3>Core Features</h3>';
+            coreSection.appendChild(coreTable);
+            featureTestsElement.appendChild(coreSection);
+            
+            const fhirSection = document.createElement('div');
+            fhirSection.className = 'report-category';
+            fhirSection.innerHTML = '<h3>FHIR Features</h3>';
+            fhirSection.appendChild(fhirTable);
+            featureTestsElement.appendChild(fhirSection);
+            
+            return compatibility;
+        }
+        
+        // Run functional tests if app is loaded in SMART context
+        async function runFunctionalTests() {
+            const functionalTestsElement = document.getElementById('functional-tests');
+            
+            try {
+                // Check if we're in a SMART launch context
+                const inSmartContext = window.FHIR && window.FHIR.oauth2;
+                
+                if (!inSmartContext) {
+                    functionalTestsElement.innerHTML = `
+                        <div class="report-test skip">
+                            <p><strong>Tests Skipped</strong></p>
+                            <p>Application is not running in a SMART launch context. Functional tests require a SMART launch.</p>
+                            <p>To run functional tests, launch the application using the SMART launch URL.</p>
+                        </div>
+                    `;
+                    return null;
+                }
+                
+                functionalTestsElement.innerHTML = '<p>Running functional tests...</p>';
+                const testResults = await runTests();
+                
+                // Generate and display test report
+                const reportElement = generateTestReport(testResults);
+                functionalTestsElement.innerHTML = '';
+                functionalTestsElement.appendChild(reportElement);
+                
+                return testResults;
+            } catch (error) {
+                console.error('Error running functional tests:', error);
+                functionalTestsElement.innerHTML = `
+                    <div class="report-test error">
+                        <p><strong>Error Running Tests</strong></p>
+                        <p>An error occurred while running functional tests: ${error.message || 'Unknown error'}</p>
+                    </div>
+                `;
+                return null;
+            }
+        }
+        
+        // Initialize
+        async function init() {
+            try {
+                // Detect browser
+                const browserName = detectBrowser();
+                
+                // Run feature tests
+                const compatibility = runFeatureTests();
+                
+                // Run functional tests
+                const functionalResults = await runFunctionalTests();
+                
+                // Attempt to take screenshot (this is just a placeholder - actual screenshot would require server-side processing)
+                const screenshotPlaceholder = document.getElementById('screenshot-placeholder');
+                screenshotPlaceholder.innerHTML = `
+                    <p>Automatic screenshots are not available in this report.</p>
+                    <p>To include screenshots in your documentation, please take them manually using your browser's screenshot tool or an external application.</p>
+                `;
+                
+                console.log('Browser compatibility report generated successfully');
+            } catch (error) {
+                console.error('Error generating report:', error);
+                document.body.innerHTML += `
+                    <div style="color: red; padding: 20px; margin: 20px; border: 1px solid red;">
+                        <h3>Error Generating Report</h3>
+                        <p>${error.message || 'Unknown error'}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Run initialization
+        init();
+    </script>
+</body>
+</html>

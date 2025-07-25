@@ -1,0 +1,332 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f9f9f9;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  min-height: 100vh;
+}
+
+header {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+header h1 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.patient-info {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  border-left: 5px solid #3498db;
+}
+
+.patient-info h3 {
+  margin: 0 0 10px 0;
+  color: #3498db;
+}
+
+.patient-info p {
+  margin: 0;
+  color: #555;
+}
+
+/* Allergies section */
+#allergies-container {
+  margin-top: 30px;
+}
+
+#allergies-container h2 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.allergies {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.allergy-item {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.allergy-item h4 {
+  margin-top: 0;
+  color: #e74c3c;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.allergy-item p {
+  margin: 5px 0;
+}
+
+/* Status and error messages */
+.error-container {
+  margin: 15px 0;
+  overflow: hidden;
+}
+
+.alert {
+  position: relative;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.alert-danger {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-left: 4px solid #dc3545;
+}
+
+.alert-warning {
+  color: #856404;
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+}
+
+.alert-info {
+  color: #0c5460;
+  background-color: #d1ecf1;
+  border-left: 4px solid #17a2b8;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border-left: 4px solid #28a745;
+}
+
+.alert h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.alert p {
+  margin: 8px 0;
+}
+
+.alert small {
+  display: block;
+  margin-top: 8px;
+  opacity: 0.7;
+}
+
+.alert .mt-2 {
+  margin-top: 12px;
+}
+
+/* Legacy status messages - keeping for backward compatibility */
+.error {
+  color: #e74c3c;
+  background-color: #fdf3f2;
+  padding: 10px;
+  border-radius: 5px;
+  border-left: 4px solid #e74c3c;
+  margin-bottom: 15px;
+}
+
+.no-allergies {
+  background-color: #edf7ed;
+  color: #27ae60;
+  padding: 15px;
+  border-radius: 5px;
+  border-left: 4px solid #27ae60;
+}
+
+/* Animation for alerts */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Loading state */
+#allergies-list p:not(.error):not(.no-allergies) {
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #3498db;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Authentication status */
+#auth-status {
+  margin-bottom: 15px;
+  padding: 8px 15px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+#auth-status.authenticated {
+  background-color: #d4edda;
+  color: #155724;
+  border-left: 4px solid #28a745;
+}
+
+#auth-status.authenticating {
+  background-color: #fff3cd;
+  color: #856404;
+  border-left: 4px solid #ffc107;
+}
+
+#auth-status.unauthenticated {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-left: 4px solid #dc3545;
+}
+
+/* Connection info */
+#connection-info {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 10px;
+}
+
+footer {
+  margin-top: 40px;
+  text-align: center;
+  color: #7f8c8d;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+/* Responsive design */
+/* Large screens (default) */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Medium screens */
+@media (max-width: 992px) {
+  .container {
+    max-width: 95%;
+    padding: 15px;
+  }
+  
+  header h1 {
+    font-size: 24px;
+  }
+  
+  #allergies-container h2,
+  #json-display-container h2 {
+    font-size: 20px;
+  }
+}
+
+/* Small screens (tablets) */
+@media (max-width: 768px) {
+  .container {
+    padding: 15px 10px;
+  }
+  
+  .patient-info {
+    padding: 10px;
+  }
+  
+  .allergy-item {
+    padding: 10px;
+  }
+  
+  .json-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .json-controls button {
+    width: 100%;
+  }
+}
+
+/* Extra small screens (mobile) */
+@media (max-width: 576px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .container {
+    padding: 10px 5px;
+  }
+  
+  header h1 {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+  
+  #allergies-container h2,
+  #json-display-container h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .allergy-item h4 {
+    font-size: 16px;
+  }
+  
+  .spinner {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .alert {
+    padding: 10px;
+  }
+  
+  .alert h4 {
+    font-size: 16px;
+  }
+  
+  footer {
+    margin-top: 30px;
+    padding-top: 15px;
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "training6-smartfhir",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "chalk": "^4.1.2"
+  },
+  "dependencies": {
+    "fhirclient": "^2.6.0"
+  }
+}
