@@ -13,14 +13,18 @@ The GigaTECH SMART on FHIR Allergy Display Application is a browser-based JavaSc
 - Critical for ensuring correct patient data is displayed
 - Eliminates manual patient selection and reduces medical errors
 
-**3. Allergy Data Retrieval**
-- Queries FHIR server for AllergyIntolerance resources using FHIR R4 specification
-- Essential for comprehensive allergy information access
+**3. Clinical Data Retrieval**
+- Queries FHIR server for AllergyIntolerance, MedicationRequest, and Immunization resources using FHIR R4 specification
+- Essential for comprehensive clinical information access
 - Supports real-time data retrieval from connected EHR systems
+- Filters MedicationRequest resources to show only those with 'Active' status
+- Limits Immunization resources to the 5 most recent records
 
-**4. JSON Data Display**
-- Shows complete allergy information in structured JSON format
-- Important for technical users and integration testing
+**4. Structured Data Display**
+- Shows clinical information in organized, expandable display cards
+- Allows users to select which resource type to view (Allergies, Medications, Immunizations)
+- Formats data for improved readability while maintaining comprehensive details
+- Important for clinical users making healthcare decisions
 - Provides full FHIR resource details for comprehensive analysis
 
 **5. Error Handling**
@@ -43,22 +47,25 @@ The GigaTECH SMART on FHIR Allergy Display Application is a browser-based JavaSc
 1. Provider clicks SMART app launch link from within EHR
 2. Application handles SMART launch sequence automatically
 3. User authenticates with their EHR credentials
-4. Application displays patient allergy information in JSON format
-5. Provider reviews allergy data for clinical decision-making
+4. Application displays expandable cards for Allergies, Medications, and Immunizations
+5. Provider selects which clinical data to view by expanding the relevant card
+6. Provider reviews formatted clinical data for decision-making
 
 **UI/UX Considerations:**
-- Minimal interface focusing on data display rather than complex interactions
-- JSON format display for technical accuracy and completeness
-- Clear error messaging for cases with no allergy data
+- Organized interface with expandable cards for different resource types
+- Formatted data display for clinical usability while maintaining accuracy
+- Clear error messaging for cases with no data for specific resource types
 - Responsive design for various screen sizes and devices
 - Fast loading times to support clinical workflow efficiency
+- Intuitive navigation between different clinical data types
 </context>
 <PRD>
 # Technical Architecture  
 **System Components:**
 - Frontend: Vanilla JavaScript application with HTML/CSS
 - Authentication: SMART on FHIR OAuth2 implementation
-- Data Layer: FHIR R4 client for AllergyIntolerance resource queries
+- Data Layer: FHIR R4 client for multiple resource queries (AllergyIntolerance, MedicationRequest, Immunization)
+- UI Components: Expandable display cards for resource type selection
 - Development Server: Node.js with http-server for static file serving
 
 **Data Models:**
@@ -69,9 +76,26 @@ The GigaTECH SMART on FHIR Allergy Display Application is a browser-based JavaSc
   - criticality: Severity level classification
   - clinicalStatus: Active, inactive, resolved status
 
+- FHIR MedicationRequest resources with key elements:
+  - patient: Reference to patient
+  - status: Medication status (filtering for 'active' only)
+  - medicationCodeableConcept: Medication identification
+  - dosageInstruction: Dosage and administration details
+  - authoredOn: Date prescribed
+
+- FHIR Immunization resources with key elements:
+  - patient: Reference to patient
+  - vaccineCode: Vaccine identification
+  - occurrence: Date administered
+  - status: Completion status
+  - performer: Clinician who administered
+
 **APIs and Integrations:**
 - SMART on FHIR launch sequence API
-- FHIR R4 REST API for AllergyIntolerance queries
+- FHIR R4 REST API for multiple resource queries:
+  - AllergyIntolerance resources
+  - MedicationRequest resources with status filtering
+  - Immunization resources with limit parameters
 - OAuth2 authorization server integration
 - EHR system integration via SMART framework
 
@@ -112,11 +136,12 @@ The GigaTECH SMART on FHIR Allergy Display Application is a browser-based JavaSc
 - Document any limitations or implementation notes
 
 **Future Enhancements:**
-- Enhanced UI/UX with human-readable allergy formatting
-- Advanced error handling with retry mechanisms
-- Unit testing framework implementation
-- Allergy severity indicators and filtering capabilities
-- Export functionality for allergy data
+- Additional clinical resource types (Conditions, Procedures, etc.)
+- Advanced filtering and sorting capabilities for all resource types
+- Printable clinical summary across all resources
+- Timeline view of patient's clinical history
+- Integration with clinical decision support systems
+- Export functionality for all clinical data
 
 # Logical Dependency Chain
 **Foundation Layer (Must be built first):**
@@ -132,12 +157,16 @@ The GigaTECH SMART on FHIR Allergy Display Application is a browser-based JavaSc
 **Data Layer (Builds on authentication):**
 7. FHIR client setup with authentication - enables data access
 8. Patient context extraction - identifies target patient
-9. AllergyIntolerance query implementation - retrieves allergy data
+9. Multiple resource query implementation:
+   - AllergyIntolerance query - retrieves allergy data
+   - MedicationRequest query with status filter - retrieves active medications
+   - Immunization query with limit - retrieves recent immunizations
 
 **Presentation Layer (Builds on data layer):**
-10. JSON display functionality - shows retrieved data
-11. Error handling and messaging - handles edge cases
-12. Testing and validation - ensures functionality
+10. Expandable card UI implementation - provides resource selection
+11. Formatted data display - shows retrieved data in readable format
+12. Error handling and messaging - handles edge cases for each resource type
+13. Testing and validation - ensures functionality across all resource types
 
 **Quick Path to Visible Frontend:**
 - Phases 1-2 provide a working SMART launch that can authenticate
@@ -182,10 +211,13 @@ The GigaTECH SMART on FHIR Allergy Display Application is a browser-based JavaSc
 - Test Patient: Ms. Mariana Acuna (confirmed to have allergy data)
 - Launch URL: http://127.0.0.1:8080/launch.html?launch=eyJhIjoiMSJ9&iss=https%3A%2F%2Flaunch.smarthealthit.org%2Fv%2Fr4%2Ffhir
 - FHIR Server: https://r4.smarthealthit.org (R4-compatible)
-- Required Query: GET [base]/AllergyIntolerance?patient=[patient-id]
+- Required Queries: 
+  - GET [base]/AllergyIntolerance?patient=[patient-id]
+  - GET [base]/MedicationRequest?patient=[patient-id]&status=active
+  - GET [base]/Immunization?patient=[patient-id]&_sort=-date&_count=5
 
 **Success Criteria:**
-- Minimum Viable Product: Successful launch, authentication, allergy retrieval, and JSON display
+- Minimum Viable Product: Successful launch, authentication, multi-resource retrieval, and expandable card display
 - Ideal Outcome: Robust error handling, clean code, comprehensive documentation
-- Quality Metrics: All functional requirements met, cross-browser compatibility, proper error messaging
+- Quality Metrics: All functional requirements met, cross-browser compatibility, proper error messaging, intuitive resource navigation
 </PRD>

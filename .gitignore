@@ -23,3 +23,8 @@ node_modules/
 
 # OS specific
 .DS_Store
+
+# Taskmaster/Windsurf/Guidelines
+/.taskmaster/*
+/.windsurf/*
+hl7-fhir.md
