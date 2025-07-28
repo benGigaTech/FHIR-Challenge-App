@@ -4,8 +4,6 @@
 
 This browser-based JavaScript application integrates with Electronic Health Record (EHR) systems using the SMART on FHIR framework to display patient allergy information. The application follows the SMART EHR launch sequence to retrieve and display allergies for the current patient being viewed in the EHR.
 
-![Application Screenshot](screenshots/app-screenshot.png)
-
 ## Features
 
 - **SMART on FHIR Integration**: Seamlessly integrates with EHR systems using the SMART launch sequence
@@ -25,8 +23,8 @@ This browser-based JavaScript application integrates with Electronic Health Reco
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/smart-fhir-allergy-app.git
-   cd smart-fhir-allergy-app
+   git clone https://github.com/benGigaTech/FHIR-Challenge-App.git
+   cd FHIR-Challenge-App
    ```
 
 2. Install dependencies:
