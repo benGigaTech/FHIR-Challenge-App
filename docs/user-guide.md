@@ -164,14 +164,6 @@ The application may display these error messages:
 - **No Allergies Found**: The patient has no recorded allergies
 - **Network Error**: There's an issue with your internet connection
 
-## Additional Resources
-
-### Support Contacts
-
-For technical issues with the application:
-- Email: support@example.com
-- Help Desk: (555) 123-4567
-
 ### Related Documentation
 
 - [FHIR AllergyIntolerance Resource](https://www.hl7.org/fhir/allergyintolerance.html)
